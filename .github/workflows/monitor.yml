@@ -33,27 +33,6 @@ jobs:
           BUFFER_CHANNEL_ID: ${{ secrets.BUFFER_CHANNEL_ID }}
           PYTHONUNBUFFERED: "1"
         run: |
-          python monitor.py
-      - name: Run monitor
-
-        env:
-
-          BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
-
-          BUFFER_CHANNEL_ID: ${{ secrets.BUFFER_CHANNEL_ID }}
-
-          PYTHONUNBUFFERED: "1"
-
-        run: |
-
-          echo "===== COMMIT ====="
-
-          git rev-parse HEAD
-
-          echo "===== MONITOR VERSION CHECK ====="
-
-          grep -n "SALE_KEYWORDS\|EXCLUDE_KEYWORDS\|version.*2\|KEYWORDS" monitor.py || true
-
-          echo "===== RUN MONITOR ====="
+          python monitor.pyMONITOR ====="
 
           python monitor.py
