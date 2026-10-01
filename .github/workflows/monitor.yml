@@ -33,6 +33,25 @@ jobs:
           BUFFER_CHANNEL_ID: ${{ secrets.BUFFER_CHANNEL_ID }}
           PYTHONUNBUFFERED: "1"
         run: |
-          python monitor.pyMONITOR ====="
-
           python monitor.py
+
+      - name: Save monitoring state
+        run: |
+          if git diff --quiet -- data/state.json; then
+            echo "No state changes."
+            exit 0
+          fi
+
+          cp data/state.json /tmp/state.json
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          cp /tmp/state.json data/state.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/state.json
+          git commit -m "Update monitoring state"
+          git push origin HEAD:main
