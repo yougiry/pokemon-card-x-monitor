@@ -542,7 +542,7 @@ def load_test_state():
 
 
 def build_preview(event):
-    def build_preview(event):
+def build_preview(event):
     lines = [
         f"【ポケカ{event['category']}】",
         "",
@@ -551,20 +551,16 @@ def build_preview(event):
     ]
 
     if event.get("price"):
-        lines.append(
-            f"価格：{event['price']}"
-        )
+        lines.append(f"価格：{event['price']}")
 
     if event.get("application_start"):
         lines.append(
-            "受付開始："
-            + event["application_start"]
+            "受付開始：" + event["application_start"]
         )
 
     if event.get("application_end"):
         lines.append(
-            "締切："
-            + event["application_end"]
+            "締切：" + event["application_end"]
         )
 
     lines.extend([
@@ -576,70 +572,6 @@ def build_preview(event):
     ])
 
     return "\n".join(lines)
-    def queue_new_or_changed(state, current):
-        """
-    新規または内容変更されたEventをpendingへ入れる。
-
-    postedに同じfingerprintが存在する場合は再投入しない。
-    pendingに同じfingerprintが既に存在する場合も重複させない。
-    """
-
-    pending = state.setdefault("pending", {})
-    posted = state.setdefault("posted", {})
-    old_events = state.get("events", {})
-
-    added = []
-
-    for event_id, event in current.items():
-        old = old_events.get(event_id)
-
-        changed = (
-            old is None
-            or old.get("fingerprint")
-            != event["fingerprint"]
-        )
-
-        if not changed:
-            continue
-
-        fingerprint = event["fingerprint"]
-
-        posted_record = posted.get(event_id)
-
-        if (
-            posted_record
-            and posted_record.get("fingerprint")
-            == fingerprint
-        ):
-            continue
-
-        pending_record = pending.get(event_id)
-
-        if (
-            pending_record
-            and pending_record.get("fingerprint")
-            == fingerprint
-        ):
-            continue
-
-        pending[event_id] = {
-            "event": event,
-            "fingerprint": fingerprint,
-            "queued_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
-            "reason": (
-                "new"
-                if old is None
-                else "changed"
-            ),
-        }
-
-        added.append(event_id)
-
-    return added
-
-
 def simulate_pending_posts(state):
     """
     Bufferには送らない。
