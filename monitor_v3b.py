@@ -695,6 +695,83 @@ def simulate_pending_posts(state):
 
     return "\n".join(lines)
 
+def queue_new_or_changed(state, current):
+    pending = state.setdefault("pending", {})
+    posted = state.setdefault("posted", {})
+    old_events = state.get("events", {})
+
+    added = []
+
+    for event_id, event in current.items():
+        old = old_events.get(event_id)
+
+        changed = (
+            old is None
+            or old.get("fingerprint") != event["fingerprint"]
+        )
+
+        if not changed:
+            continue
+
+        fingerprint = event["fingerprint"]
+
+        posted_record = posted.get(event_id)
+
+        if (
+            posted_record
+            and posted_record.get("fingerprint") == fingerprint
+        ):
+            continue
+
+        pending_record = pending.get(event_id)
+
+        if (
+            pending_record
+            and pending_record.get("fingerprint") == fingerprint
+        ):
+            continue
+
+        pending[event_id] = {
+            "event": event,
+            "fingerprint": fingerprint,
+            "queued_at": datetime.now(timezone.utc).isoformat(),
+            "reason": "new" if old is None else "changed",
+        }
+
+        added.append(event_id)
+
+    return added
+
+
+def simulate_pending_posts(state):
+    pending = state.setdefault("pending", {})
+    posted = state.setdefault("posted", {})
+
+    selected = list(pending.items())[:MAX_POSTS_PER_RUN]
+
+    simulated = []
+
+    for event_id, record in selected:
+        event = record["event"]
+
+        print()
+        print("=" * 72)
+        print("WOULD POST TO X")
+        print("=" * 72)
+        print(build_preview(event))
+
+        posted[event_id] = {
+            "fingerprint": record["fingerprint"],
+            "posted_at": datetime.now(timezone.utc).isoformat(),
+            "mode": "dry_run_simulation",
+        }
+
+        simulated.append(event_id)
+
+    for event_id in simulated:
+        pending.pop(event_id, None)
+
+    return simulated
 
 def main():
     print(
