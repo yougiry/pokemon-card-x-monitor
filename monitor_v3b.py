@@ -9,20 +9,33 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 
-VERSION = "3C1-QUEUE-DRY-RUN"
+# ============================================================
+# Pokemon Card Monitor V3-C1
+# Queue DRY RUN
+#
+# ・Buffer/Xには投稿しない
+# ・本番 data/state.json は変更しない
+# ・data/state_v3_test.json のみ使用
+# ============================================================
+
+VERSION = "3C1-INTEGRATED-QUEUE-DRY-RUN"
 
 TEST_STATE_FILE = Path("data/state_v3_test.json")
 
-# キュー動作確認のため一時的に1件。
-
-# 本番では3に変更する。
-
+# キュー確認用。
+# 本番移行時には3件などへ変更する。
 MAX_POSTS_PER_RUN = 1
+
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/140.0 Safari/537.36"
 )
+
+
+# ============================================================
+# Sources
+# ============================================================
 
 SOURCES = [
     {
@@ -58,6 +71,11 @@ SOURCES = [
     },
 ]
 
+
+# ============================================================
+# Keywords
+# ============================================================
+
 POKEMON_KEYWORDS = [
     "ポケモンカード",
     "ポケモンカードゲーム",
@@ -73,6 +91,7 @@ STRONG_SALE_KEYWORDS = [
     ("抽選応募", "抽選"),
     ("予約受付", "予約"),
     ("予約販売", "予約"),
+    ("予約受け付け", "予約"),
     ("受注販売", "受注"),
     ("招待販売", "招待"),
     ("追加販売", "追加販売"),
@@ -107,36 +126,80 @@ TOURNAMENT_KEYWORDS = [
 ]
 
 
+# ============================================================
+# HTTP
+# ============================================================
+
 def fetch(url):
-    req = urllib.request.Request(
+    request = urllib.request.Request(
         url,
         headers={
             "User-Agent": USER_AGENT,
-            "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
-            "Accept-Language": "ja,en-US;q=0.7,en;q=0.3",
+            "Accept": (
+                "text/html,"
+                "application/xhtml+xml,"
+                "*/*;q=0.8"
+            ),
+            "Accept-Language": (
+                "ja,en-US;q=0.7,en;q=0.3"
+            ),
         },
     )
 
-    with urllib.request.urlopen(req, timeout=30) as response:
+    with urllib.request.urlopen(
+        request,
+        timeout=30,
+    ) as response:
         raw = response.read()
-        charset = response.headers.get_content_charset() or "utf-8"
+
+        charset = (
+            response.headers.get_content_charset()
+            or "utf-8"
+        )
 
         try:
-            return raw.decode(charset, errors="replace")
-        except LookupError:
-            return raw.decode("utf-8", errors="replace")
+            return raw.decode(
+                charset,
+                errors="replace",
+            )
 
+        except LookupError:
+            return raw.decode(
+                "utf-8",
+                errors="replace",
+            )
+
+
+# ============================================================
+# Text utilities
+# ============================================================
 
 def clean_text(value):
+    if not value:
+        return ""
+
     value = re.sub(
-        r"<script\b.*?</script>|<style\b.*?</style>|<!--.*?-->",
+        r"<script\b.*?</script>"
+        r"|<style\b.*?</style>"
+        r"|<!--.*?-->",
         " ",
         value,
         flags=re.I | re.S,
     )
-    value = re.sub(r"<[^>]+>", " ", value)
+
+    value = re.sub(
+        r"<[^>]+>",
+        " ",
+        value,
+    )
+
     value = html.unescape(value)
-    return re.sub(r"\s+", " ", value).strip()
+
+    return re.sub(
+        r"\s+",
+        " ",
+        value,
+    ).strip()
 
 
 def normalize_title(title):
@@ -156,23 +219,35 @@ def normalize_title(title):
     )
 
     title = re.sub(
-        r"^\d{4}[./年]\d{1,2}[./月]\d{1,2}日?\s*",
+        r"^\d{4}[./年]"
+        r"\d{1,2}[./月]"
+        r"\d{1,2}日?\s*",
         "",
         title,
     )
 
     title = re.sub(
-        r"\s+\d{4}\.\d{1,2}\.\d{1,2}\s*$",
+        r"\s+\d{4}\."
+        r"\d{1,2}\."
+        r"\d{1,2}\s*$",
         "",
         title,
     )
 
-    return re.sub(r"\s+", " ", title).strip()
+    return re.sub(
+        r"\s+",
+        " ",
+        title,
+    ).strip()
 
 
 def contains_pokemon(text):
     lower = text.lower()
-    return any(k.lower() in lower for k in POKEMON_KEYWORDS)
+
+    return any(
+        keyword.lower() in lower
+        for keyword in POKEMON_KEYWORDS
+    )
 
 
 def detect_category(text):
@@ -188,21 +263,26 @@ def detect_category(text):
 def title_excluded(title):
     lower = title.lower()
 
-    if any(k.lower() in lower for k in EXCLUDE_TITLE_KEYWORDS):
+    if any(
+        keyword.lower() in lower
+        for keyword in EXCLUDE_TITLE_KEYWORDS
+    ):
         return True
 
-    if any(k.lower() in lower for k in TOURNAMENT_KEYWORDS):
+    if any(
+        keyword.lower() in lower
+        for keyword in TOURNAMENT_KEYWORDS
+    ):
         return True
 
     return False
 
 
 def title_is_sale_candidate(title):
-    """
-    最重要:
-    本文全体ではなく、まず記事タイトルそのものを判定する。
-    """
     title = normalize_title(title)
+
+    if not title:
+        return False
 
     if title_excluded(title):
         return False
@@ -216,9 +296,17 @@ def title_is_sale_candidate(title):
     return True
 
 
+# ============================================================
+# URL utilities
+# ============================================================
+
 def same_domain(url, domain):
     host = urlparse(url).netloc.lower()
-    return host == domain or host.endswith("." + domain)
+
+    return (
+        host == domain
+        or host.endswith("." + domain)
+    )
 
 
 def canonical_url(url):
@@ -230,10 +318,14 @@ def canonical_url(url):
         f"{parsed.path}"
     )
 
-    # ポケセンは ?id= が記事識別子なので残す
-    if "pokemoncenter-online.com" in parsed.netloc.lower():
-        if parsed.query:
-            result += "?" + parsed.query
+    # Pokémon Center Online は
+    # ?id= が記事識別子なのでqueryを保持する。
+    if (
+        "pokemoncenter-online.com"
+        in parsed.netloc.lower()
+        and parsed.query
+    ):
+        result += "?" + parsed.query
 
     return result
 
@@ -243,23 +335,40 @@ def article_url_allowed(source, url):
     path = parsed.path
 
     if source["type"] == "pokemon_official":
-        if same_domain(url, source["domain"]):
+        if same_domain(
+            url,
+            source["domain"],
+        ):
             return "/info/" in path
 
-        return "pokemoncenter-online.com" in parsed.netloc.lower()
+        return (
+            "pokemoncenter-online.com"
+            in parsed.netloc.lower()
+        )
 
-    if not same_domain(url, source["domain"]):
+    if not same_domain(
+        url,
+        source["domain"],
+    ):
         return False
 
     if source["type"] == "geo":
-        return bool(re.fullmatch(r"/news/\d+/?", path))
+        return bool(
+            re.fullmatch(
+                r"/news/\d+/?",
+                path,
+            )
+        )
 
     if source["type"] == "tsutaya":
-        return bool(re.fullmatch(r"/article/\d+\.html", path))
+        return bool(
+            re.fullmatch(
+                r"/article/\d+\.html",
+                path,
+            )
+        )
 
     if source["type"] == "sanyodo":
-        # B3では診断を優先。
-        # query付きタグ/カテゴリページ自体はEvent化しない。
         if parsed.query:
             return False
 
@@ -271,9 +380,15 @@ def article_url_allowed(source, url):
     return False
 
 
+# ============================================================
+# Link extraction
+# ============================================================
+
 def extract_all_links(source, page):
     pattern = re.compile(
-        r'<a\b[^>]*href\s*=\s*["\']([^"\']+)["\'][^>]*>(.*?)</a>',
+        r'<a\b[^>]*'
+        r'href\s*=\s*["\']([^"\']+)["\']'
+        r'[^>]*>(.*?)</a>',
         flags=re.I | re.S,
     )
 
@@ -285,51 +400,83 @@ def extract_all_links(source, page):
         if not title:
             continue
 
-        url = urljoin(source["url"], html.unescape(href))
+        raw_url = urljoin(
+            source["url"],
+            html.unescape(href),
+        )
 
-        if not url.startswith(("https://", "http://")):
+        if not raw_url.startswith(
+            ("https://", "http://")
+        ):
             continue
 
-        if not same_domain(url, source["domain"]):
-            if not (
-                source["type"] == "pokemon_official"
+        if not same_domain(
+            raw_url,
+            source["domain"],
+        ):
+            is_pokemon_center = (
+                source["type"]
+                == "pokemon_official"
                 and "pokemoncenter-online.com"
-                in urlparse(url).netloc.lower()
-            ):
+                in urlparse(
+                    raw_url
+                ).netloc.lower()
+            )
+
+            if not is_pokemon_center:
                 continue
 
-        key = canonical_url(url)
+        key = canonical_url(raw_url)
 
         results[key] = {
             "title": title,
             "url": key,
-            "raw_url": url,
+            "raw_url": raw_url,
         }
 
-    return list(results.values())
+    return list(
+        results.values()
+    )
 
 
-def extract_article_links(source, page):
-    all_links = extract_all_links(source, page)
+def extract_article_links(
+    source,
+    page,
+):
+    all_links = extract_all_links(
+        source,
+        page,
+    )
 
     return [
         item
         for item in all_links
-        if article_url_allowed(source, item["url"])
+        if article_url_allowed(
+            source,
+            item["url"],
+        )
     ]
 
 
-def print_sanyodo_diagnostics(source, page):
-    """
-    三洋堂だけ記事URL構造が未確定なので、
-    ポケカ/抽選/販売を含むリンクをログに出す。
-    """
-    print("SANYODO URL DIAGNOSTICS:")
+# ============================================================
+# Sanyodo diagnostics
+# ============================================================
+
+def print_sanyodo_diagnostics(
+    source,
+    page,
+):
+    print(
+        "SANYODO URL DIAGNOSTICS:"
+    )
 
     matches = []
 
-    for item in extract_all_links(source, page):
-        text = item["title"].lower()
+    for item in extract_all_links(
+        source,
+        page,
+    ):
+        text = item["title"]
 
         if (
             contains_pokemon(text)
@@ -340,18 +487,37 @@ def print_sanyodo_diagnostics(source, page):
             matches.append(item)
 
     for item in matches[:30]:
-        print(f"  TITLE: {item['title'][:120]}")
-        print(f"  HREF : {item['raw_url']}")
+        print(
+            f"  TITLE: "
+            f"{item['title'][:120]}"
+        )
 
-    print(f"SANYODO DIAGNOSTIC LINKS: {len(matches)}")
+        print(
+            f"  HREF : "
+            f"{item['raw_url']}"
+        )
 
+    print(
+        "SANYODO DIAGNOSTIC LINKS: "
+        f"{len(matches)}"
+    )
+
+
+# ============================================================
+# Detail extraction
+# ============================================================
 
 def extract_price(text):
+    if not text:
+        return None
+
     patterns = [
         (
-            r"(?:販売価格|税込価格|希望小売価格|価格)"
+            r"(?:販売価格|税込価格|"
+            r"希望小売価格|価格)"
             r"[\s：:]*"
-            r"([0-9]{1,3}(?:,[0-9]{3})+円)"
+            r"([0-9]{1,3}"
+            r"(?:,[0-9]{3})+円)"
         ),
         (
             r"(?:販売価格|税込価格|価格)"
@@ -361,7 +527,10 @@ def extract_price(text):
     ]
 
     for pattern in patterns:
-        match = re.search(pattern, text)
+        match = re.search(
+            pattern,
+            text,
+        )
 
         if match:
             return match.group(1)
@@ -375,50 +544,101 @@ def extract_period(text):
         "application_end": None,
     }
 
-    date = (
-        r"\d{4}年\d{1,2}月\d{1,2}日"
+    if not text:
+        return result
+
+    date_pattern = (
+        r"\d{4}年"
+        r"\d{1,2}月"
+        r"\d{1,2}日"
         r"(?:\([^)]+\))?"
-        r"(?:\s*\d{1,2}[:時]\d{0,2}分?)?"
+        r"(?:\s*"
+        r"\d{1,2}"
+        r"[:時]"
+        r"\d{0,2}分?"
+        r")?"
     )
 
     patterns = [
         (
-            rf"(?:応募期間|受付期間|抽選期間|応募受付)"
+            rf"(?:応募期間|受付期間|"
+            rf"抽選期間|応募受付)"
             rf"[^0-9]{{0,80}}"
-            rf"({date})"
+            rf"({date_pattern})"
             rf"\s*[～〜~\-]\s*"
-            rf"({date})"
+            rf"({date_pattern})"
         ),
     ]
 
     for pattern in patterns:
-        match = re.search(pattern, text)
+        match = re.search(
+            pattern,
+            text,
+        )
 
         if match:
-            result["application_start"] = match.group(1)
-            result["application_end"] = match.group(2)
+            result[
+                "application_start"
+            ] = match.group(1)
+
+            result[
+                "application_end"
+            ] = match.group(2)
+
             break
 
     return result
 
 
-def make_event(source, item, detail_text, detail_status):
-    title = normalize_title(item["title"])
+# ============================================================
+# Event
+# ============================================================
 
-    if not title_is_sale_candidate(title):
+def make_event(
+    source,
+    item,
+    detail_text,
+    detail_status,
+):
+    title = normalize_title(
+        item["title"]
+    )
+
+    # 本文にキーワードが存在するだけでは
+    # Eventへ昇格させない。
+    if not title_is_sale_candidate(
+        title
+    ):
         return None
 
-    category = detect_category(title)
+    category = detect_category(
+        title
+    )
 
     retailer = source["name"]
 
-    if "pokemoncenter-online.com" in item["url"]:
-        retailer = "ポケモンセンターオンライン"
+    if (
+        "pokemoncenter-online.com"
+        in item["url"]
+    ):
+        retailer = (
+            "ポケモンセンターオンライン"
+        )
 
-    periods = extract_period(detail_text)
+    periods = extract_period(
+        detail_text
+    )
+
+    event_id_source = (
+        retailer
+        + "|"
+        + item["url"]
+    )
 
     event_id = hashlib.sha256(
-        (retailer + "|" + item["url"]).encode("utf-8")
+        event_id_source.encode(
+            "utf-8"
+        )
     ).hexdigest()[:24]
 
     event = {
@@ -426,10 +646,24 @@ def make_event(source, item, detail_text, detail_status):
         "product_name": title,
         "retailer": retailer,
         "category": category,
-        "application_start": periods["application_start"],
-        "application_end": periods["application_end"],
+        "application_start": (
+            periods[
+                "application_start"
+            ]
+        ),
+        "application_end": (
+            periods[
+                "application_end"
+            ]
+        ),
         "sale_datetime": None,
-        "price": extract_price(detail_text) if detail_text else None,
+        "price": (
+            extract_price(
+                detail_text
+            )
+            if detail_text
+            else None
+        ),
         "conditions": None,
         "official_url": item["url"],
         "source_url": source["url"],
@@ -438,17 +672,59 @@ def make_event(source, item, detail_text, detail_status):
         "detail_status": detail_status,
     }
 
+    # fingerprintには
+    # 安定した意味情報だけを使用する。
     fingerprint_data = {
-        "product_name": event.get("product_name"),
-        "retailer": event.get("retailer"),
-        "category": event.get("category"),
-        "application_start": event.get("application_start"),
-        "application_end": event.get("application_end"),
-        "sale_datetime": event.get("sale_datetime"),
-        "price": event.get("price"),
-        "conditions": event.get("conditions"),
-        "official_url": event.get("official_url"),
-        "status": event.get("status"),
+        "product_name": (
+            event.get(
+                "product_name"
+            )
+        ),
+        "retailer": (
+            event.get(
+                "retailer"
+            )
+        ),
+        "category": (
+            event.get(
+                "category"
+            )
+        ),
+        "application_start": (
+            event.get(
+                "application_start"
+            )
+        ),
+        "application_end": (
+            event.get(
+                "application_end"
+            )
+        ),
+        "sale_datetime": (
+            event.get(
+                "sale_datetime"
+            )
+        ),
+        "price": (
+            event.get(
+                "price"
+            )
+        ),
+        "conditions": (
+            event.get(
+                "conditions"
+            )
+        ),
+        "official_url": (
+            event.get(
+                "official_url"
+            )
+        ),
+        "status": (
+            event.get(
+                "status"
+            )
+        ),
     }
 
     fingerprint_source = json.dumps(
@@ -457,19 +733,39 @@ def make_event(source, item, detail_text, detail_status):
         sort_keys=True,
     )
 
-    event["fingerprint"] = hashlib.sha256(
-        fingerprint_source.encode("utf-8")
-    ).hexdigest()
+    event["fingerprint"] = (
+        hashlib.sha256(
+            fingerprint_source.encode(
+                "utf-8"
+            )
+        ).hexdigest()
+    )
 
-    return eventdef inspect_item(source, item):
-    # タイトル段階で落とす。
-    # 不要な詳細ページへのアクセスも削減できる。
-    if not title_is_sale_candidate(item["title"]):
+    return event
+
+
+# ============================================================
+# Individual article
+# ============================================================
+
+def inspect_item(
+    source,
+    item,
+):
+    # タイトル段階で除外。
+    if not title_is_sale_candidate(
+        item["title"]
+    ):
         return None
 
     try:
-        page = fetch(item["url"])
-        text = clean_text(page)
+        page = fetch(
+            item["url"]
+        )
+
+        text = clean_text(
+            page
+        )
 
         return make_event(
             source,
@@ -479,8 +775,14 @@ def make_event(source, item, detail_text, detail_status):
         )
 
     except urllib.error.HTTPError as exc:
-        print(f"  HTTP {exc.code}: {item['url']}")
+        print(
+            f"  HTTP {exc.code}: "
+            f"{item['url']}"
+        )
 
+        # Pokémon Center Online等、
+        # 403でも一覧タイトルが公式に
+        # 確認できる場合はEventを保持。
         return make_event(
             source,
             item,
@@ -490,281 +792,139 @@ def make_event(source, item, detail_text, detail_status):
 
     except Exception as exc:
         print(
-            f"  ERROR {type(exc).__name__}: "
-            f"{item['url']}"
+            "  ERROR "
+            f"{type(exc).__name__}: "
+            f"{item['url']} "
+            f"{exc}"
         )
+
         return None
 
+
+# ============================================================
+# Source scan
+# ============================================================
 
 def scan_source(source):
     print()
     print("=" * 72)
-    print(f"Checking {source['name']}")
+    print(
+        f"Checking "
+        f"{source['name']}"
+    )
 
-    page = fetch(source["url"])
+    page = fetch(
+        source["url"]
+    )
 
-    if source["type"] == "sanyodo":
-        print_sanyodo_diagnostics(source, page)
+    if (
+        source["type"]
+        == "sanyodo"
+    ):
+        print_sanyodo_diagnostics(
+            source,
+            page,
+        )
 
-    links = extract_article_links(source, page)
+    links = extract_article_links(
+        source,
+        page,
+    )
 
-    print(f"Article links: {len(links)}")
+    print(
+        f"Article links: "
+        f"{len(links)}"
+    )
 
     title_candidates = [
         item
         for item in links
-        if title_is_sale_candidate(item["title"])
+        if title_is_sale_candidate(
+            item["title"]
+        )
     ]
 
     print(
-        f"Title-qualified candidates: "
+        "Title-qualified candidates: "
         f"{len(title_candidates)}"
     )
 
     events = []
 
     for item in title_candidates[:30]:
-        event = inspect_item(source, item)
+        event = inspect_item(
+            source,
+            item,
+        )
 
         if event:
-            events.append(event)
+            events.append(
+                event
+            )
 
-    print(f"Verified sale events: {len(events)}")
+    print(
+        f"Verified sale events: "
+        f"{len(events)}"
+    )
 
     return events
 
 
+# ============================================================
+# State
+# ============================================================
+
+def empty_state():
+    return {
+        "version": 3,
+        "initialized": False,
+        "events": {},
+        "pending": {},
+        "posted": {},
+    }
+
+
 def load_test_state():
     if not TEST_STATE_FILE.exists():
-        return {
-            "version": 3,
-            "initialized": False,
-            "events": {},
-            "pending": {},
-            "posted": {},
-        }
+        return empty_state()
 
-    with TEST_STATE_FILE.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    try:
+        with TEST_STATE_FILE.open(
+            "r",
+            encoding="utf-8",
+        ) as file:
+            state = json.load(
+                file
+            )
 
-
-def build_preview(event):
-    lines = [
-        f"【ポケカ{event['category']}】",
-        "",
-        event["product_name"],
-        f"販売店：{event['retailer']}",
-    ]
-
-    if event.get("price"):
-        lines.append(f"価格：{event['price']}")
-
-    if event.get("application_start"):
-        lines.append(
-            "受付開始：" + event["application_start"]
+    except Exception as exc:
+        print(
+            "WARNING: "
+            "state_v3_test.json "
+            "could not be loaded:"
+        )
+        print(
+            f"  {type(exc).__name__}: "
+            f"{exc}"
         )
 
-    if event.get("application_end"):
-        lines.append(
-            "締切：" + event["application_end"]
-        )
+        return empty_state()
 
-    lines.extend([
-        "",
-        "▼公式",
-        event["official_url"],
-        "",
-        "#ポケカ #ポケモンカード",
-    ])
+    if not isinstance(
+        state,
+        dict,
+    ):
+        return empty_state()
 
-    return "\n".join(lines)
-def simulate_pending_posts(state):
-    """
-    Bufferには送らない。
-
-    pendingから最大MAX_POSTS_PER_RUN件を
-    投稿したものとしてpostedへ移動する。
-    """
-
-    pending = state.setdefault(
-        "pending",
-        {},
+    state.setdefault(
+        "version",
+        3,
     )
 
-    posted = state.setdefault(
-        "posted",
-        {},
+    state.setdefault(
+        "initialized",
+        False,
     )
-
-    queue = list(
-        pending.items()
-    )
-
-    selected = queue[
-        :MAX_POSTS_PER_RUN
-    ]
-
-    simulated = []
-
-    for event_id, record in selected:
-        event = record["event"]
-
-        print()
-        print("=" * 72)
-        print("WOULD POST TO X")
-        print("=" * 72)
-        print(build_preview(event))
-
-        posted[event_id] = {
-            "fingerprint": (
-                record["fingerprint"]
-            ),
-            "posted_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
-            "mode": "dry_run_simulation",
-        }
-
-        simulated.append(
-            event_id
-        )
-
-    for event_id in simulated:
-        pending.pop(
-            event_id,
-            None,
-        )
-
-    return simulated
-    
-    lines = [
-        f"【ポケカ{event['category']}】",
-        "",
-        event["product_name"],
-        f"販売店：{event['retailer']}",
-    ]
-
-    if event.get("price"):
-        lines.append(f"価格：{event['price']}")
-
-    if event.get("application_start"):
-        lines.append(
-            "受付開始：" + event["application_start"]
-        )
-
-    if event.get("application_end"):
-        lines.append(
-            "締切：" + event["application_end"]
-        )
-
-    lines.extend([
-        "",
-        "▼公式",
-        event["official_url"],
-        "",
-        "#ポケカ #ポケモンカード",
-    ])
-
-    return "\n".join(lines)
-
-def queue_new_or_changed(state, current):
-    pending = state.setdefault("pending", {})
-    posted = state.setdefault("posted", {})
-    old_events = state.get("events", {})
-
-    added = []
-
-    for event_id, event in current.items():
-        old = old_events.get(event_id)
-
-        changed = (
-            old is None
-            or old.get("fingerprint") != event["fingerprint"]
-        )
-
-        if not changed:
-            continue
-
-        fingerprint = event["fingerprint"]
-
-        posted_record = posted.get(event_id)
-
-        if (
-            posted_record
-            and posted_record.get("fingerprint") == fingerprint
-        ):
-            continue
-
-        pending_record = pending.get(event_id)
-
-        if (
-            pending_record
-            and pending_record.get("fingerprint") == fingerprint
-        ):
-            continue
-
-        pending[event_id] = {
-            "event": event,
-            "fingerprint": fingerprint,
-            "queued_at": datetime.now(timezone.utc).isoformat(),
-            "reason": "new" if old is None else "changed",
-        }
-
-        added.append(event_id)
-
-    return added
-
-
-def simulate_pending_posts(state):
-    pending = state.setdefault("pending", {})
-    posted = state.setdefault("posted", {})
-
-    selected = list(pending.items())[:MAX_POSTS_PER_RUN]
-
-    simulated = []
-
-    for event_id, record in selected:
-        event = record["event"]
-
-        print()
-        print("=" * 72)
-        print("WOULD POST TO X")
-        print("=" * 72)
-        print(build_preview(event))
-
-        posted[event_id] = {
-            "fingerprint": record["fingerprint"],
-            "posted_at": datetime.now(timezone.utc).isoformat(),
-            "mode": "dry_run_simulation",
-        }
-
-        simulated.append(event_id)
-
-    for event_id in simulated:
-        pending.pop(event_id, None)
-
-    return simulated
-
-def main():
-    print(
-        f"Pokemon Card Monitor "
-        f"{VERSION}"
-    )
-
-    print(
-        "DRY RUN: Buffer/X投稿なし"
-    )
-
-    print(
-        "DRY RUN: 本番state.json変更なし"
-    )
-
-    print(
-        f"MAX_POSTS_PER_RUN="
-        f"{MAX_POSTS_PER_RUN}"
-    )
-
-    state = load_test_state()
 
     state.setdefault(
         "events",
@@ -779,6 +939,369 @@ def main():
     state.setdefault(
         "posted",
         {},
+    )
+
+    return state
+
+
+def save_test_state(state):
+    TEST_STATE_FILE.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    with TEST_STATE_FILE.open(
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            state,
+            file,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+
+        file.write("\n")
+
+
+# ============================================================
+# X preview
+# ============================================================
+
+def build_preview(event):
+    lines = [
+        (
+            f"【ポケカ"
+            f"{event['category']}】"
+        ),
+        "",
+        event["product_name"],
+        (
+            f"販売店："
+            f"{event['retailer']}"
+        ),
+    ]
+
+    if event.get("price"):
+        lines.append(
+            f"価格："
+            f"{event['price']}"
+        )
+
+    if event.get(
+        "application_start"
+    ):
+        lines.append(
+            "受付開始："
+            + event[
+                "application_start"
+            ]
+        )
+
+    if event.get(
+        "application_end"
+    ):
+        lines.append(
+            "締切："
+            + event[
+                "application_end"
+            ]
+        )
+
+    lines.extend(
+        [
+            "",
+            "▼公式",
+            event["official_url"],
+            "",
+            (
+                "#ポケカ "
+                "#ポケモンカード"
+            ),
+        ]
+    )
+
+    return "\n".join(
+        lines
+    )
+
+
+# ============================================================
+# Queue
+# ============================================================
+
+def queue_new_or_changed(
+    state,
+    current,
+):
+    pending = state.setdefault(
+        "pending",
+        {},
+    )
+
+    posted = state.setdefault(
+        "posted",
+        {},
+    )
+
+    old_events = state.get(
+        "events",
+        {},
+    )
+
+    added = []
+
+    for event_id, event in (
+        current.items()
+    ):
+        old = old_events.get(
+            event_id
+        )
+
+        old_fingerprint = (
+            old.get("fingerprint")
+            if old
+            else None
+        )
+
+        new_fingerprint = (
+            event["fingerprint"]
+        )
+
+        if old is None:
+            print(
+                "QUEUE DEBUG: NEW | "
+                f"{event['retailer']} | "
+                f"{event['product_name'][:60]}"
+            )
+
+        elif (
+            old_fingerprint
+            != new_fingerprint
+        ):
+            print(
+                "QUEUE DEBUG: CHANGED | "
+                f"{event['retailer']} | "
+                f"{event['product_name'][:60]}"
+            )
+
+            print(
+                f"  OLD: "
+                f"{old_fingerprint}"
+            )
+
+            print(
+                f"  NEW: "
+                f"{new_fingerprint}"
+            )
+
+        else:
+            print(
+                "QUEUE DEBUG: SAME | "
+                f"{event['retailer']} | "
+                f"{event['product_name'][:60]}"
+            )
+
+        changed = (
+            old is None
+            or old_fingerprint
+            != new_fingerprint
+        )
+
+        if not changed:
+            continue
+
+        # 同じfingerprintを既に
+        # 投稿済みなら再投稿しない。
+        posted_record = posted.get(
+            event_id
+        )
+
+        if (
+            posted_record
+            and posted_record.get(
+                "fingerprint"
+            )
+            == new_fingerprint
+        ):
+            print(
+                "  SKIP: "
+                "already posted"
+            )
+
+            continue
+
+        # 同じfingerprintが既に
+        # pendingなら重複登録しない。
+        pending_record = pending.get(
+            event_id
+        )
+
+        if (
+            pending_record
+            and pending_record.get(
+                "fingerprint"
+            )
+            == new_fingerprint
+        ):
+            print(
+                "  SKIP: "
+                "already pending"
+            )
+
+            continue
+
+        pending[event_id] = {
+            "event": event,
+            "fingerprint": (
+                new_fingerprint
+            ),
+            "queued_at": (
+                datetime.now(
+                    timezone.utc
+                ).isoformat()
+            ),
+            "reason": (
+                "new"
+                if old is None
+                else "changed"
+            ),
+        }
+
+        added.append(
+            event_id
+        )
+
+    return added
+
+
+# ============================================================
+# Queue DRY RUN
+# ============================================================
+
+def simulate_pending_posts(
+    state,
+):
+    pending = state.setdefault(
+        "pending",
+        {},
+    )
+
+    posted = state.setdefault(
+        "posted",
+        {},
+    )
+
+    selected = list(
+        pending.items()
+    )[:MAX_POSTS_PER_RUN]
+
+    simulated = []
+
+    for (
+        event_id,
+        record,
+    ) in selected:
+        event = record[
+            "event"
+        ]
+
+        print()
+        print("=" * 72)
+        print(
+            "WOULD POST TO X"
+        )
+        print("=" * 72)
+
+        print(
+            build_preview(
+                event
+            )
+        )
+
+        # DRY RUNなので実際には
+        # Bufferへ送らない。
+        #
+        # キュー動作検証のため、
+        # 投稿成功したものとして
+        # test stateのpostedへ移動する。
+        posted[event_id] = {
+            "fingerprint": (
+                record[
+                    "fingerprint"
+                ]
+            ),
+            "posted_at": (
+                datetime.now(
+                    timezone.utc
+                ).isoformat()
+            ),
+            "mode": (
+                "dry_run_simulation"
+            ),
+        }
+
+        simulated.append(
+            event_id
+        )
+
+    # 「投稿成功」したものだけ
+    # pendingから削除する。
+    for event_id in simulated:
+        pending.pop(
+            event_id,
+            None,
+        )
+
+    return simulated
+
+
+# ============================================================
+# Main
+# ============================================================
+
+def main():
+    print(
+        "Pokemon Card Monitor "
+        f"{VERSION}"
+    )
+
+    print(
+        "DRY RUN: "
+        "Buffer/X投稿なし"
+    )
+
+    print(
+        "DRY RUN: "
+        "本番state.json変更なし"
+    )
+
+    print(
+        "MAX_POSTS_PER_RUN="
+        f"{MAX_POSTS_PER_RUN}"
+    )
+
+    state = load_test_state()
+
+    print()
+    print(
+        "STATE BEFORE:"
+    )
+
+    print(
+        "  events="
+        f"{len(state['events'])}"
+    )
+
+    print(
+        "  pending="
+        f"{len(state['pending'])}"
+    )
+
+    print(
+        "  posted="
+        f"{len(state['posted'])}"
     )
 
     current = {}
@@ -796,7 +1319,7 @@ def main():
 
         except Exception as exc:
             print(
-                f"SOURCE ERROR "
+                "SOURCE ERROR "
                 f"{source['name']}: "
                 f"{type(exc).__name__}: "
                 f"{exc}"
@@ -804,8 +1327,9 @@ def main():
 
     print()
     print("=" * 72)
+
     print(
-        f"TOTAL VERIFIED EVENTS: "
+        "TOTAL VERIFIED EVENTS: "
         f"{len(current)}"
     )
 
@@ -814,35 +1338,39 @@ def main():
         current,
     )
 
+    print()
     print(
-        f"ADDED TO PENDING: "
+        "ADDED TO PENDING: "
         f"{len(added)}"
     )
 
     print(
-        f"PENDING BEFORE POST: "
+        "PENDING BEFORE POST: "
         f"{len(state['pending'])}"
     )
 
-    simulated = simulate_pending_posts(
-        state
+    simulated = (
+        simulate_pending_posts(
+            state
+        )
     )
 
     print()
     print(
-        f"WOULD POST COUNT: "
+        "WOULD POST COUNT: "
         f"{len(simulated)}"
     )
 
     print(
-        f"REMAINING PENDING: "
+        "REMAINING PENDING: "
         f"{len(state['pending'])}"
     )
 
-    # 現在確認できたEventを最後に保存する
+    # 現在取得できたEventを保存。
     state["events"] = current
 
     state["version"] = 3
+
     state["initialized"] = True
 
     state["updated_at"] = (
@@ -851,25 +1379,34 @@ def main():
         ).isoformat()
     )
 
-    TEST_STATE_FILE.parent.mkdir(
-        parents=True,
-        exist_ok=True,
+    save_test_state(
+        state
     )
-
-    with TEST_STATE_FILE.open(
-        "w",
-        encoding="utf-8",
-    ) as file:
-        json.dump(
-            state,
-            file,
-            ensure_ascii=False,
-            indent=2,
-        )
 
     print()
     print(
-        "V3-C1 QUEUE DRY RUN completed."
+        "STATE AFTER:"
+    )
+
+    print(
+        "  events="
+        f"{len(state['events'])}"
+    )
+
+    print(
+        "  pending="
+        f"{len(state['pending'])}"
+    )
+
+    print(
+        "  posted="
+        f"{len(state['posted'])}"
+    )
+
+    print()
+    print(
+        "V3-C1 INTEGRATED "
+        "QUEUE DRY RUN completed."
     )
 
 
