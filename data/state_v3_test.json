@@ -54,28 +54,6 @@
   },
   "initialized": true,
   "pending": {
-    "83012a4498da15921e7e5f1b": {
-      "event": {
-        "application_end": null,
-        "application_start": null,
-        "category": "抽選",
-        "conditions": null,
-        "detail_status": "fetched",
-        "fingerprint": "bf9e399e2d6f5b76dba09cae6b07c461a084785a3fb21cca06b7853298c3a7a8",
-        "id": "83012a4498da15921e7e5f1b",
-        "official_url": "https://geo-online.co.jp/news/785",
-        "price": null,
-        "product_name": "「ポケモンカードゲーム 」「ONE PIECEカードゲーム』再販商品 抽選販売受付のお知らせ",
-        "retailer": "GEO",
-        "sale_datetime": null,
-        "source_url": "https://geo-online.co.jp/news/",
-        "status": "unknown",
-        "verified": true
-      },
-      "fingerprint": "bf9e399e2d6f5b76dba09cae6b07c461a084785a3fb21cca06b7853298c3a7a8",
-      "queued_at": "2026-10-01T23:41:52.170145+00:00",
-      "reason": "new"
-    },
     "ef9468e28773815d296b0bc6": {
       "event": {
         "application_end": null,
@@ -104,8 +82,13 @@
       "fingerprint": "58492a898911cce08854909a30049b374877c0a0b5358cabcef530b5758410e3",
       "mode": "dry_run_simulation",
       "posted_at": "2026-10-01T23:41:52.170181+00:00"
+    },
+    "83012a4498da15921e7e5f1b": {
+      "fingerprint": "bf9e399e2d6f5b76dba09cae6b07c461a084785a3fb21cca06b7853298c3a7a8",
+      "mode": "dry_run_simulation",
+      "posted_at": "2026-10-01T23:42:39.279194+00:00"
     }
   },
-  "updated_at": "2026-10-01T23:41:52.170195+00:00",
+  "updated_at": "2026-10-01T23:42:39.279229+00:00",
   "version": 3
 }
