@@ -1,0 +1,31 @@
+name: Pokemon Card Extraction Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pokemon-card-extraction-test
+  cancel-in-progress: false
+
+jobs:
+  extraction-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Run extraction test
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python extract_test.py
