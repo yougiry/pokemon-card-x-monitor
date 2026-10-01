@@ -441,11 +441,28 @@ def make_event(source, item, detail_text, detail_status):
         "detail_status": detail_status,
     }
 
-    fingerprint_source = json.dumps(
-        event,
-        ensure_ascii=False,
-        sort_keys=True,
-    )
+    fingerprint_data = {
+    "product_name": event.get("product_name"),
+    "retailer": event.get("retailer"),
+    "category": event.get("category"),
+    "application_start": event.get("application_start"),
+    "application_end": event.get("application_end"),
+    "sale_datetime": event.get("sale_datetime"),
+    "price": event.get("price"),
+    "conditions": event.get("conditions"),
+    "official_url": event.get("official_url"),
+    "status": event.get("status"),
+}
+
+fingerprint_source = json.dumps(
+    fingerprint_data,
+    ensure_ascii=False,
+    sort_keys=True,
+)
+
+event["fingerprint"] = hashlib.sha256(
+    fingerprint_source.encode("utf-8")
+).hexdigest()
 
     event["fingerprint"] = hashlib.sha256(
         fingerprint_source.encode("utf-8")
