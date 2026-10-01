@@ -9,9 +9,15 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 
-VERSION = "3B3-DRY-RUN"
+VERSION = "3C1-QUEUE-DRY-RUN"
+
 TEST_STATE_FILE = Path("data/state_v3_test.json")
 
+# キュー動作確認のため一時的に1件。
+
+# 本番では3に変更する。
+
+MAX_POSTS_PER_RUN = 1
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
     "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -536,6 +542,128 @@ def load_test_state():
 
 
 def build_preview(event):
+    def queue_new_or_changed(state, current):
+    """
+    新規または内容変更されたEventをpendingへ入れる。
+
+    postedに同じfingerprintが存在する場合は再投入しない。
+    pendingに同じfingerprintが既に存在する場合も重複させない。
+    """
+
+    pending = state.setdefault("pending", {})
+    posted = state.setdefault("posted", {})
+    old_events = state.get("events", {})
+
+    added = []
+
+    for event_id, event in current.items():
+        old = old_events.get(event_id)
+
+        changed = (
+            old is None
+            or old.get("fingerprint")
+            != event["fingerprint"]
+        )
+
+        if not changed:
+            continue
+
+        fingerprint = event["fingerprint"]
+
+        posted_record = posted.get(event_id)
+
+        if (
+            posted_record
+            and posted_record.get("fingerprint")
+            == fingerprint
+        ):
+            continue
+
+        pending_record = pending.get(event_id)
+
+        if (
+            pending_record
+            and pending_record.get("fingerprint")
+            == fingerprint
+        ):
+            continue
+
+        pending[event_id] = {
+            "event": event,
+            "fingerprint": fingerprint,
+            "queued_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+            "reason": (
+                "new"
+                if old is None
+                else "changed"
+            ),
+        }
+
+        added.append(event_id)
+
+    return added
+
+def simulate_pending_posts(state):
+    """
+    Bufferには送らない。
+
+    pendingから最大MAX_POSTS_PER_RUN件を
+    投稿したものとしてpostedへ移動する。
+    """
+
+    pending = state.setdefault(
+        "pending",
+        {},
+    )
+
+    posted = state.setdefault(
+        "posted",
+        {},
+    )
+
+    queue = list(
+        pending.items()
+    )
+
+    selected = queue[
+        :MAX_POSTS_PER_RUN
+    ]
+
+    simulated = []
+
+    for event_id, record in selected:
+        event = record["event"]
+
+        print()
+        print("=" * 72)
+        print("WOULD POST TO X")
+        print("=" * 72)
+        print(build_preview(event))
+
+        posted[event_id] = {
+            "fingerprint": (
+                record["fingerprint"]
+            ),
+            "posted_at": datetime.now(
+                timezone.utc
+            ).isoformat(),
+            "mode": "dry_run_simulation",
+        }
+
+        simulated.append(
+            event_id
+        )
+
+    for event_id in simulated:
+        pending.pop(
+            event_id,
+            None,
+        )
+
+    return simulated
+    
     lines = [
         f"【ポケカ{event['category']}】",
         "",
@@ -568,88 +696,131 @@ def build_preview(event):
 
 
 def main():
-    print(f"Pokemon Card Monitor {VERSION}")
-    print("DRY RUN: X/Buffer投稿なし")
-    print("DRY RUN: 本番state.json変更なし")
+    print(
+        f"Pokemon Card Monitor "
+        f"{VERSION}"
+    )
+
+    print(
+        "DRY RUN: Buffer/X投稿なし"
+    )
+
+    print(
+        "DRY RUN: 本番state.json変更なし"
+    )
+
+    print(
+        f"MAX_POSTS_PER_RUN="
+        f"{MAX_POSTS_PER_RUN}"
+    )
 
     state = load_test_state()
+
+    state.setdefault(
+        "events",
+        {},
+    )
+
+    state.setdefault(
+        "pending",
+        {},
+    )
+
+    state.setdefault(
+        "posted",
+        {},
+    )
+
     current = {}
 
     for source in SOURCES:
         try:
-            events = scan_source(source)
+            events = scan_source(
+                source
+            )
 
             for event in events:
-                current[event["id"]] = event
+                current[
+                    event["id"]
+                ] = event
 
         except Exception as exc:
             print(
-                f"SOURCE ERROR {source['name']}: "
-                f"{type(exc).__name__}: {exc}"
+                f"SOURCE ERROR "
+                f"{source['name']}: "
+                f"{type(exc).__name__}: "
+                f"{exc}"
             )
 
     print()
     print("=" * 72)
-    print(f"TOTAL VERIFIED EVENTS: {len(current)}")
+    print(
+        f"TOTAL VERIFIED EVENTS: "
+        f"{len(current)}"
+    )
 
-    old_events = state.get("events", {})
-    new_or_changed = []
+    added = queue_new_or_changed(
+        state,
+        current,
+    )
 
-    for event_id, event in current.items():
-        old = old_events.get(event_id)
+    print(
+        f"ADDED TO PENDING: "
+        f"{len(added)}"
+    )
 
-        if (
-            not old
-            or old.get("fingerprint")
-            != event["fingerprint"]
-        ):
-            new_or_changed.append(event)
+    print(
+        f"PENDING BEFORE POST: "
+        f"{len(state['pending'])}"
+    )
 
-    print(f"NEW/CHANGED: {len(new_or_changed)}")
+    simulated = simulate_pending_posts(
+        state
+    )
 
-    # B2の9件baselineからB3へ移行したため、
-    # 今回は全Verified Eventを画面確認する。
     print()
-    print("B3 VERIFIED EVENT PREVIEW")
+    print(
+        f"WOULD POST COUNT: "
+        f"{len(simulated)}"
+    )
 
-    for event in current.values():
-        print()
-        print("-" * 72)
-        print(build_preview(event))
-        print(
-            f"DETAIL STATUS: "
-            f"{event['detail_status']}"
-        )
+    print(
+        f"REMAINING PENDING: "
+        f"{len(state['pending'])}"
+    )
+
+    # 現在確認できたEventを最後に保存する
+    state["events"] = current
+
+    state["version"] = 3
+    state["initialized"] = True
+
+    state["updated_at"] = (
+        datetime.now(
+            timezone.utc
+        ).isoformat()
+    )
 
     TEST_STATE_FILE.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    test_state = {
-        "version": 3,
-        "initialized": True,
-        "updated_at": datetime.now(
-            timezone.utc
-        ).isoformat(),
-        "events": current,
-        "pending": state.get("pending", {}),
-        "posted": state.get("posted", {}),
-    }
-
     with TEST_STATE_FILE.open(
         "w",
         encoding="utf-8",
     ) as file:
         json.dump(
-            test_state,
+            state,
             file,
             ensure_ascii=False,
             indent=2,
         )
 
     print()
-    print("V3-B3 DRY RUN completed.")
+    print(
+        "V3-C1 QUEUE DRY RUN completed."
+    )
 
 
 if __name__ == "__main__":
