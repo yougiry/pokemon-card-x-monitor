@@ -1,0 +1,88 @@
+name: Buffer X Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  post-to-x:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send test post to Buffer
+        env:
+          BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+          BUFFER_CHANNEL_ID: ${{ secrets.BUFFER_CHANNEL_ID }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          api_key = os.environ["BUFFER_API_KEY"]
+          channel_id = os.environ["BUFFER_CHANNEL_ID"]
+
+          query = """
+          mutation PublishTestPost($input: CreatePostInput!) {
+            createPost(input: $input) {
+              __typename
+            }
+          }
+          """
+
+          variables = {
+              "input": {
+                  "channelId": channel_id,
+                  "text": "【GitHub Actions 動作テスト】\nポケカ販売情報自動通知システムからの投稿テストです。\n#ポケカ",
+                  "mode": "shareNow",
+                  "schedulingType": "automatic",
+                  "aiAssisted": True
+              }
+          }
+
+          payload = json.dumps({
+              "query": query,
+              "variables": variables
+          }).encode("utf-8")
+
+          request = urllib.request.Request(
+              "https://api.buffer.com",
+              data=payload,
+              headers={
+                  "Authorization": f"Bearer {api_key}",
+                  "Content-Type": "application/json"
+              },
+              method="POST"
+          )
+
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  body = response.read().decode("utf-8")
+                  result = json.loads(body)
+
+                  print("HTTP:", response.status)
+                  print(json.dumps(result, ensure_ascii=False, indent=2))
+
+                  errors = result.get("errors")
+                  if errors:
+                      raise RuntimeError(
+                          "Buffer GraphQL returned errors: "
+                          + json.dumps(errors, ensure_ascii=False)
+                      )
+
+                  typename = (
+                      result.get("data", {})
+                      .get("createPost", {})
+                      .get("__typename")
+                  )
+
+                  if typename != "PostActionSuccess":
+                      raise RuntimeError(
+                          f"Unexpected Buffer result: {typename}"
+                      )
+
+                  print("SUCCESS: Buffer accepted the X post.")
+
+          except Exception as e:
+              print("ERROR:", repr(e))
+              raise
+          PY
