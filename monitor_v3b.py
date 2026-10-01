@@ -464,10 +464,6 @@ event["fingerprint"] = hashlib.sha256(
     fingerprint_source.encode("utf-8")
 ).hexdigest()
 
-    event["fingerprint"] = hashlib.sha256(
-        fingerprint_source.encode("utf-8")
-    ).hexdigest()
-
     return event
 
 
