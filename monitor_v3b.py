@@ -542,9 +542,8 @@ def load_test_state():
 
 
 def build_preview(event):
-    def queue_new_or_changed(state, current):
-
-    """
+    def queue_new_or_changed(state, current):　
+        """
     新規または内容変更されたEventをpendingへ入れる。
 
     postedに同じfingerprintが存在する場合は再投入しない。
