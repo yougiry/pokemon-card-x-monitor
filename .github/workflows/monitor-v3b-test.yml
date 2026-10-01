@@ -30,6 +30,34 @@ jobs:
         run: |
           python monitor_v3b.py
 
+      - name: Debug V3 state
+        run: |
+          echo "=== FILE ==="
+          ls -l data/state_v3_test.json || true
+
+          echo "=== GIT STATUS ==="
+          git status --short
+
+          echo "=== GIT DIFF ==="
+          git diff -- data/state_v3_test.json || true
+
+          echo "=== STATE COUNTS ==="
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("data/state_v3_test.json")
+
+          print("exists:", p.exists())
+
+          if p.exists():
+              state = json.loads(p.read_text(encoding="utf-8"))
+              print("events:", len(state.get("events", {})))
+              print("pending:", len(state.get("pending", {})))
+              print("posted:", len(state.get("posted", {})))
+          PY
+
+
       - name: Save V3 test state
         run: |
           if git diff --quiet -- data/state_v3_test.json; then
