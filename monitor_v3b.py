@@ -405,9 +405,6 @@ def extract_period(text):
 def make_event(source, item, detail_text, detail_status):
     title = normalize_title(item["title"])
 
-    # B3の核心。
-    # 一覧に表示された記事タイトル自体が
-    # ポケカ販売案件でなければ本文を理由に昇格させない。
     if not title_is_sale_candidate(title):
         return None
 
@@ -442,32 +439,29 @@ def make_event(source, item, detail_text, detail_status):
     }
 
     fingerprint_data = {
-    "product_name": event.get("product_name"),
-    "retailer": event.get("retailer"),
-    "category": event.get("category"),
-    "application_start": event.get("application_start"),
-    "application_end": event.get("application_end"),
-    "sale_datetime": event.get("sale_datetime"),
-    "price": event.get("price"),
-    "conditions": event.get("conditions"),
-    "official_url": event.get("official_url"),
-    "status": event.get("status"),
-}
+        "product_name": event.get("product_name"),
+        "retailer": event.get("retailer"),
+        "category": event.get("category"),
+        "application_start": event.get("application_start"),
+        "application_end": event.get("application_end"),
+        "sale_datetime": event.get("sale_datetime"),
+        "price": event.get("price"),
+        "conditions": event.get("conditions"),
+        "official_url": event.get("official_url"),
+        "status": event.get("status"),
+    }
 
-fingerprint_source = json.dumps(
-    fingerprint_data,
-    ensure_ascii=False,
-    sort_keys=True,
-)
+    fingerprint_source = json.dumps(
+        fingerprint_data,
+        ensure_ascii=False,
+        sort_keys=True,
+    )
 
-event["fingerprint"] = hashlib.sha256(
-    fingerprint_source.encode("utf-8")
-).hexdigest()
+    event["fingerprint"] = hashlib.sha256(
+        fingerprint_source.encode("utf-8")
+    ).hexdigest()
 
-    return event
-
-
-def inspect_item(source, item):
+    return eventdef inspect_item(source, item):
     # タイトル段階で落とす。
     # 不要な詳細ページへのアクセスも削減できる。
     if not title_is_sale_candidate(item["title"]):
