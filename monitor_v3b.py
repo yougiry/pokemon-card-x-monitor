@@ -542,7 +542,6 @@ def load_test_state():
 
 
 def build_preview(event):
-def build_preview(event):
     lines = [
         f"【ポケカ{event['category']}】",
         "",
