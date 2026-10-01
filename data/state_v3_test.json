@@ -1,0 +1,111 @@
+{
+  "events": {
+    "45f03be85124a40ff541c9da": {
+      "application_end": null,
+      "application_start": null,
+      "category": "追加販売",
+      "conditions": null,
+      "detail_status": "fetched",
+      "fingerprint": "58492a898911cce08854909a30049b374877c0a0b5358cabcef530b5758410e3",
+      "id": "45f03be85124a40ff541c9da",
+      "official_url": "https://www.pokemon-card.com/info/005069.html",
+      "price": null,
+      "product_name": "ポケモンカードゲーム スカーレット＆バイオレット スペシャルBOXの追加生産、および追加販売のお知らせ",
+      "retailer": "ポケモンカード公式",
+      "sale_datetime": null,
+      "source_url": "https://www.pokemon-card.com/info/index.html",
+      "status": "unknown",
+      "verified": true
+    },
+    "83012a4498da15921e7e5f1b": {
+      "application_end": null,
+      "application_start": null,
+      "category": "抽選",
+      "conditions": null,
+      "detail_status": "fetched",
+      "fingerprint": "bf9e399e2d6f5b76dba09cae6b07c461a084785a3fb21cca06b7853298c3a7a8",
+      "id": "83012a4498da15921e7e5f1b",
+      "official_url": "https://geo-online.co.jp/news/785",
+      "price": null,
+      "product_name": "「ポケモンカードゲーム 」「ONE PIECEカードゲーム』再販商品 抽選販売受付のお知らせ",
+      "retailer": "GEO",
+      "sale_datetime": null,
+      "source_url": "https://geo-online.co.jp/news/",
+      "status": "unknown",
+      "verified": true
+    },
+    "ef9468e28773815d296b0bc6": {
+      "application_end": null,
+      "application_start": null,
+      "category": "抽選",
+      "conditions": null,
+      "detail_status": "fetched",
+      "fingerprint": "0e334b0502acaff1b8ba023417a9abe079f613b090c45b2e555454673dfdd910",
+      "id": "ef9468e28773815d296b0bc6",
+      "official_url": "https://geo-online.co.jp/news/783",
+      "price": null,
+      "product_name": "10月16日(金)発売『ポケモンカードゲーム MEGA「30th CELEBRATION カードセット」（9種セット）』抽選販売受付のお知らせ",
+      "retailer": "GEO",
+      "sale_datetime": null,
+      "source_url": "https://geo-online.co.jp/news/",
+      "status": "unknown",
+      "verified": true
+    }
+  },
+  "initialized": true,
+  "pending": {
+    "83012a4498da15921e7e5f1b": {
+      "event": {
+        "application_end": null,
+        "application_start": null,
+        "category": "抽選",
+        "conditions": null,
+        "detail_status": "fetched",
+        "fingerprint": "bf9e399e2d6f5b76dba09cae6b07c461a084785a3fb21cca06b7853298c3a7a8",
+        "id": "83012a4498da15921e7e5f1b",
+        "official_url": "https://geo-online.co.jp/news/785",
+        "price": null,
+        "product_name": "「ポケモンカードゲーム 」「ONE PIECEカードゲーム』再販商品 抽選販売受付のお知らせ",
+        "retailer": "GEO",
+        "sale_datetime": null,
+        "source_url": "https://geo-online.co.jp/news/",
+        "status": "unknown",
+        "verified": true
+      },
+      "fingerprint": "bf9e399e2d6f5b76dba09cae6b07c461a084785a3fb21cca06b7853298c3a7a8",
+      "queued_at": "2026-10-01T23:41:52.170145+00:00",
+      "reason": "new"
+    },
+    "ef9468e28773815d296b0bc6": {
+      "event": {
+        "application_end": null,
+        "application_start": null,
+        "category": "抽選",
+        "conditions": null,
+        "detail_status": "fetched",
+        "fingerprint": "0e334b0502acaff1b8ba023417a9abe079f613b090c45b2e555454673dfdd910",
+        "id": "ef9468e28773815d296b0bc6",
+        "official_url": "https://geo-online.co.jp/news/783",
+        "price": null,
+        "product_name": "10月16日(金)発売『ポケモンカードゲーム MEGA「30th CELEBRATION カードセット」（9種セット）』抽選販売受付のお知らせ",
+        "retailer": "GEO",
+        "sale_datetime": null,
+        "source_url": "https://geo-online.co.jp/news/",
+        "status": "unknown",
+        "verified": true
+      },
+      "fingerprint": "0e334b0502acaff1b8ba023417a9abe079f613b090c45b2e555454673dfdd910",
+      "queued_at": "2026-10-01T23:41:52.170136+00:00",
+      "reason": "new"
+    }
+  },
+  "posted": {
+    "45f03be85124a40ff541c9da": {
+      "fingerprint": "58492a898911cce08854909a30049b374877c0a0b5358cabcef530b5758410e3",
+      "mode": "dry_run_simulation",
+      "posted_at": "2026-10-01T23:41:52.170181+00:00"
+    }
+  },
+  "updated_at": "2026-10-01T23:41:52.170195+00:00",
+  "version": 3
+}
