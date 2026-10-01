@@ -34,24 +34,26 @@ jobs:
           PYTHONUNBUFFERED: "1"
         run: |
           python monitor.py
+      - name: Run monitor
 
-      - name: Save monitoring state
+        env:
+
+          BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+
+          BUFFER_CHANNEL_ID: ${{ secrets.BUFFER_CHANNEL_ID }}
+
+          PYTHONUNBUFFERED: "1"
+
         run: |
-          if git diff --quiet -- data/state.json; then
-            echo "No state changes."
-            exit 0
-          fi
 
-          cp data/state.json /tmp/state.json
+          echo "===== COMMIT ====="
 
-          git fetch origin main
-          git reset --hard origin/main
+          git rev-parse HEAD
 
-          cp /tmp/state.json data/state.json
+          echo "===== MONITOR VERSION CHECK ====="
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          grep -n "SALE_KEYWORDS\|EXCLUDE_KEYWORDS\|version.*2\|KEYWORDS" monitor.py || true
 
-          git add data/state.json
-          git commit -m "Update monitoring state"
-          git push origin HEAD:main
+          echo "===== RUN MONITOR ====="
+
+          python monitor.py
