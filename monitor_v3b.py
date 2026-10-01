@@ -542,6 +542,40 @@ def load_test_state():
 
 
 def build_preview(event):
+    def build_preview(event):
+    lines = [
+        f"【ポケカ{event['category']}】",
+        "",
+        event["product_name"],
+        f"販売店：{event['retailer']}",
+    ]
+
+    if event.get("price"):
+        lines.append(
+            f"価格：{event['price']}"
+        )
+
+    if event.get("application_start"):
+        lines.append(
+            "受付開始："
+            + event["application_start"]
+        )
+
+    if event.get("application_end"):
+        lines.append(
+            "締切："
+            + event["application_end"]
+        )
+
+    lines.extend([
+        "",
+        "▼公式",
+        event["official_url"],
+        "",
+        "#ポケカ #ポケモンカード",
+    ])
+
+    return "\n".join(lines)
     def queue_new_or_changed(state, current):
         """
     新規または内容変更されたEventをpendingへ入れる。
