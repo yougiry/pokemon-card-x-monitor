@@ -1,4 +1,76 @@
 {
-  "initialized": false,
-  "events": {}
+  "events": {
+    "1e8d61ccfac24f6e32de6193": {
+      "fingerprint": "b8fa4e93c4ce7dfb1db99788e6ab8ae4c268a44b031f1971838d3210001f2e95",
+      "first_seen": "2026-10-01T11:43:20.314540+00:00",
+      "id": "1e8d61ccfac24f6e32de6193",
+      "last_seen": "2026-10-01T11:43:20.314540+00:00",
+      "posted_fingerprint": "b8fa4e93c4ce7dfb1db99788e6ab8ae4c268a44b031f1971838d3210001f2e95",
+      "source": "ポケモンカード公式",
+      "title": "その他 「シティリーグ2027 シーズン1」事前抽選のエントリー期間延長のお知らせ 2026.8.31",
+      "url": "https://www.pokemon-card.com/info/005629.html"
+    },
+    "87ab030a91d858f57b6fce73": {
+      "fingerprint": "81ec576e40e2964e85e278073810e307801b93b97161da926690e2d7b34254fb",
+      "first_seen": "2026-10-01T11:43:20.314540+00:00",
+      "id": "87ab030a91d858f57b6fce73",
+      "last_seen": "2026-10-01T11:43:20.314540+00:00",
+      "posted_fingerprint": "81ec576e40e2964e85e278073810e307801b93b97161da926690e2d7b34254fb",
+      "source": "ポケモンカード公式",
+      "title": "その他 ポケモンカードゲーム スカーレット＆バイオレット スペシャルBOXの追加生産、および追加販売のお知らせ 2026.3.13",
+      "url": "https://www.pokemon-card.com/info/005069.html"
+    },
+    "b8ffd244e238ffc731f5ca12": {
+      "fingerprint": "c9c165de5a11143b0b35a8d1bed2c9391edcc6865a000d89d771736e4cfedf3e",
+      "first_seen": "2026-10-01T11:43:20.314540+00:00",
+      "id": "b8ffd244e238ffc731f5ca12",
+      "last_seen": "2026-10-01T11:43:20.314540+00:00",
+      "posted_fingerprint": "c9c165de5a11143b0b35a8d1bed2c9391edcc6865a000d89d771736e4cfedf3e",
+      "source": "ポケモンカード公式",
+      "title": "イベント 「チャンピオンズリーグ2027 横浜」エントリー期間および抽選結果発表日の延長について 2026.8.17",
+      "url": "https://www.pokemon-card.com/info/005612.html"
+    },
+    "bf655da448aa1ae1cf33ccea": {
+      "fingerprint": "ef97950182f1e940dff80b9b3dd68f2651c2d56c12096339280d7dee7dadfb26",
+      "first_seen": "2026-10-01T11:43:20.314540+00:00",
+      "id": "bf655da448aa1ae1cf33ccea",
+      "last_seen": "2026-10-01T11:43:20.314540+00:00",
+      "posted_fingerprint": "ef97950182f1e940dff80b9b3dd68f2651c2d56c12096339280d7dee7dadfb26",
+      "source": "ポケモンカード公式",
+      "title": "イベント 追加先着エントリーの受付開始 2026.4.3",
+      "url": "https://www.pokemon-card.com/info/005403.html"
+    },
+    "d482c9d1b2bc9db5cbbde86a": {
+      "fingerprint": "f9d7c665941b092900ce6f589b1deab4bd66a938425f96e997345e837548f8a3",
+      "first_seen": "2026-10-01T11:43:20.314540+00:00",
+      "id": "d482c9d1b2bc9db5cbbde86a",
+      "last_seen": "2026-10-01T11:43:20.314540+00:00",
+      "posted_fingerprint": "f9d7c665941b092900ce6f589b1deab4bd66a938425f96e997345e837548f8a3",
+      "source": "ポケモンカード公式",
+      "title": "その他 ポケモンセンターオンラインでの商品の抽選受け付けについて (外部リンク) 2026.9.29",
+      "url": "https://www.pokemoncenter-online.com/news/?id=20260929 "
+    },
+    "f025502e09dbf2cfc132d031": {
+      "fingerprint": "d07cefb6d7b18702902f9983aa6f812dd5e9f8271c83071107b3a20c0682c2e2",
+      "first_seen": "2026-10-01T11:43:20.314540+00:00",
+      "id": "f025502e09dbf2cfc132d031",
+      "last_seen": "2026-10-01T11:43:20.314540+00:00",
+      "posted_fingerprint": "d07cefb6d7b18702902f9983aa6f812dd5e9f8271c83071107b3a20c0682c2e2",
+      "source": "ポケモンカード公式",
+      "title": "イベント 「ポケモンジャパンチャンピオンシップス2026」カードゲーム部門、エントリー受付開始！ 2026.5.1",
+      "url": "https://www.pokemon-card.com/info/005411.html"
+    },
+    "f490a76273389bf28aa04e3e": {
+      "fingerprint": "cdbdb313a0ae60e1bbef65276bc976566a2664e9afede669b23d9c82e29ca849",
+      "first_seen": "2026-10-01T11:43:20.314540+00:00",
+      "id": "f490a76273389bf28aa04e3e",
+      "last_seen": "2026-10-01T11:43:20.314540+00:00",
+      "posted_fingerprint": "cdbdb313a0ae60e1bbef65276bc976566a2664e9afede669b23d9c82e29ca849",
+      "source": "ポケモンカード公式",
+      "title": "その他 【第二回】ポケモンセンターオンラインでの30周年商品の抽選受け付けについて (外部リンク) 2026.8.21",
+      "url": "https://www.pokemoncenter-online.com/news/?id=20260821"
+    }
+  },
+  "initialized": true,
+  "updated_at": "2026-10-01T11:43:20.314540+00:00"
 }
