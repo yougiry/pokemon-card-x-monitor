@@ -1,562 +1,76 @@
-import hashlib
-import html
-import json
-import os
-import re
-import urllib.request
-from datetime import datetime, timezone
-from pathlib import Path
-from urllib.parse import urljoin
-
-
-STATE_FILE = Path("data/state.json")
-
-SOURCES = [
-    {
-        "id": "pokemon-card-news",
-        "name": "ポケモンカード公式",
-        "url": "https://www.pokemon-card.com/info/index.html",
+{
+  "events": {
+    "1e8d61ccfac24f6e32de6193": {
+      "fingerprint": "b8fa4e93c4ce7dfb1db99788e6ab8ae4c268a44b031f1971838d3210001f2e95",
+      "first_seen": "2026-10-01T11:38:28.594505+00:00",
+      "id": "1e8d61ccfac24f6e32de6193",
+      "last_seen": "2026-10-01T11:38:28.594505+00:00",
+      "posted_fingerprint": "b8fa4e93c4ce7dfb1db99788e6ab8ae4c268a44b031f1971838d3210001f2e95",
+      "source": "ポケモンカード公式",
+      "title": "その他 「シティリーグ2027 シーズン1」事前抽選のエントリー期間延長のお知らせ 2026.8.31",
+      "url": "https://www.pokemon-card.com/info/005629.html"
+    },
+    "87ab030a91d858f57b6fce73": {
+      "fingerprint": "81ec576e40e2964e85e278073810e307801b93b97161da926690e2d7b34254fb",
+      "first_seen": "2026-10-01T11:38:28.594505+00:00",
+      "id": "87ab030a91d858f57b6fce73",
+      "last_seen": "2026-10-01T11:38:28.594505+00:00",
+      "posted_fingerprint": "81ec576e40e2964e85e278073810e307801b93b97161da926690e2d7b34254fb",
+      "source": "ポケモンカード公式",
+      "title": "その他 ポケモンカードゲーム スカーレット＆バイオレット スペシャルBOXの追加生産、および追加販売のお知らせ 2026.3.13",
+      "url": "https://www.pokemon-card.com/info/005069.html"
+    },
+    "b8ffd244e238ffc731f5ca12": {
+      "fingerprint": "c9c165de5a11143b0b35a8d1bed2c9391edcc6865a000d89d771736e4cfedf3e",
+      "first_seen": "2026-10-01T11:38:28.594505+00:00",
+      "id": "b8ffd244e238ffc731f5ca12",
+      "last_seen": "2026-10-01T11:38:28.594505+00:00",
+      "posted_fingerprint": "c9c165de5a11143b0b35a8d1bed2c9391edcc6865a000d89d771736e4cfedf3e",
+      "source": "ポケモンカード公式",
+      "title": "イベント 「チャンピオンズリーグ2027 横浜」エントリー期間および抽選結果発表日の延長について 2026.8.17",
+      "url": "https://www.pokemon-card.com/info/005612.html"
+    },
+    "bf655da448aa1ae1cf33ccea": {
+      "fingerprint": "ef97950182f1e940dff80b9b3dd68f2651c2d56c12096339280d7dee7dadfb26",
+      "first_seen": "2026-10-01T11:38:28.594505+00:00",
+      "id": "bf655da448aa1ae1cf33ccea",
+      "last_seen": "2026-10-01T11:38:28.594505+00:00",
+      "posted_fingerprint": "ef97950182f1e940dff80b9b3dd68f2651c2d56c12096339280d7dee7dadfb26",
+      "source": "ポケモンカード公式",
+      "title": "イベント 追加先着エントリーの受付開始 2026.4.3",
+      "url": "https://www.pokemon-card.com/info/005403.html"
+    },
+    "d482c9d1b2bc9db5cbbde86a": {
+      "fingerprint": "f9d7c665941b092900ce6f589b1deab4bd66a938425f96e997345e837548f8a3",
+      "first_seen": "2026-10-01T11:38:28.594505+00:00",
+      "id": "d482c9d1b2bc9db5cbbde86a",
+      "last_seen": "2026-10-01T11:38:28.594505+00:00",
+      "posted_fingerprint": "f9d7c665941b092900ce6f589b1deab4bd66a938425f96e997345e837548f8a3",
+      "source": "ポケモンカード公式",
+      "title": "その他 ポケモンセンターオンラインでの商品の抽選受け付けについて (外部リンク) 2026.9.29",
+      "url": "https://www.pokemoncenter-online.com/news/?id=20260929 "
+    },
+    "f025502e09dbf2cfc132d031": {
+      "fingerprint": "d07cefb6d7b18702902f9983aa6f812dd5e9f8271c83071107b3a20c0682c2e2",
+      "first_seen": "2026-10-01T11:38:28.594505+00:00",
+      "id": "f025502e09dbf2cfc132d031",
+      "last_seen": "2026-10-01T11:38:28.594505+00:00",
+      "posted_fingerprint": "d07cefb6d7b18702902f9983aa6f812dd5e9f8271c83071107b3a20c0682c2e2",
+      "source": "ポケモンカード公式",
+      "title": "イベント 「ポケモンジャパンチャンピオンシップス2026」カードゲーム部門、エントリー受付開始！ 2026.5.1",
+      "url": "https://www.pokemon-card.com/info/005411.html"
+    },
+    "f490a76273389bf28aa04e3e": {
+      "fingerprint": "cdbdb313a0ae60e1bbef65276bc976566a2664e9afede669b23d9c82e29ca849",
+      "first_seen": "2026-10-01T11:38:28.594505+00:00",
+      "id": "f490a76273389bf28aa04e3e",
+      "last_seen": "2026-10-01T11:38:28.594505+00:00",
+      "posted_fingerprint": "cdbdb313a0ae60e1bbef65276bc976566a2664e9afede669b23d9c82e29ca849",
+      "source": "ポケモンカード公式",
+      "title": "その他 【第二回】ポケモンセンターオンラインでの30周年商品の抽選受け付けについて (外部リンク) 2026.8.21",
+      "url": "https://www.pokemoncenter-online.com/news/?id=20260821"
     }
-]
-
-# 商品の購入機会に関係する語
-SALE_KEYWORDS = [
-    "抽選販売",
-    "予約販売",
-    "受注販売",
-    "招待販売",
-    "追加販売",
-    "再販売",
-    "再販",
-    "再入荷",
-    "在庫",
-    "販売開始",
-    "販売方法",
-    "商品の抽選",
-    "商品抽選",
-    "ポケモンセンターオンライン",
-]
-
-# 大会・イベント参加情報は除外
-EXCLUDE_KEYWORDS = [
-    "シティリーグ",
-    "チャンピオンズリーグ",
-    "ジャパンチャンピオンシップス",
-    "PJCS",
-    "大会",
-    "エントリー",
-    "イベント参加",
-    "プレイヤーズクラブ",
-]
-
-USER_AGENT = (
-    "Mozilla/5.0 (compatible; pokemon-card-x-monitor/2.0; "
-    "+https://github.com/yougiry/pokemon-card-x-monitor)"
-)
-
-
-def fetch(url):
-    req = urllib.request.Request(
-        url.strip(),
-        headers={
-            "User-Agent": USER_AGENT,
-            "Accept": "text/html,application/xhtml+xml",
-        },
-    )
-
-    with urllib.request.urlopen(req, timeout=30) as res:
-        return res.read().decode("utf-8", errors="replace")
-
-
-def clean_text(value):
-    value = re.sub(
-        r"<script.*?</script>",
-        " ",
-        value,
-        flags=re.I | re.S,
-    )
-    value = re.sub(
-        r"<style.*?</style>",
-        " ",
-        value,
-        flags=re.I | re.S,
-    )
-    value = re.sub(r"<[^>]+>", " ", value)
-    value = html.unescape(value)
-    return re.sub(r"\s+", " ", value).strip()
-
-
-def is_sale_information(title):
-    if any(word in title for word in EXCLUDE_KEYWORDS):
-        return False
-
-    return any(word in title for word in SALE_KEYWORDS)
-
-
-def extract_candidates(source, page):
-    links = re.findall(
-        r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>',
-        page,
-        flags=re.I | re.S,
-    )
-
-    unique = {}
-
-    for href, body in links:
-        title = clean_text(body)
-
-        if not title:
-            continue
-
-        if not is_sale_information(title):
-            continue
-
-        url = urljoin(source["url"], href).strip()
-
-        if not (
-            "pokemon-card.com" in url
-            or "pokemoncenter-online.com" in url
-        ):
-            continue
-
-        event_id = hashlib.sha256(
-            f'{source["id"]}|{url}'.encode("utf-8")
-        ).hexdigest()[:24]
-
-        unique[event_id] = {
-            "id": event_id,
-            "source": source["name"],
-            "title": title,
-            "url": url,
-        }
-
-    return list(unique.values())
-
-
-def extract_detail(item):
-    """
-    詳細ページを取得し、販売情報らしい内容を抽出する。
-    取得失敗時は元情報を保持する。
-    """
-
-    result = dict(item)
-
-    result.update(
-        {
-            "retailer": None,
-            "sale_type": None,
-            "price": None,
-            "application_start": None,
-            "application_end": None,
-            "status": "unknown",
-            "detail_text": None,
-        }
-    )
-
-    try:
-        page = fetch(item["url"])
-        text = clean_text(page)
-
-        # state.jsonが巨大化しないよう制限
-        result["detail_text"] = text[:4000]
-
-        if "pokemoncenter-online.com" in item["url"]:
-            result["retailer"] = "ポケモンセンターオンライン"
-
-        elif "pokemon-card.com" in item["url"]:
-            result["retailer"] = "ポケモンカード公式"
-
-        combined = item["title"] + " " + text[:10000]
-
-        if "抽選" in combined:
-            result["sale_type"] = "抽選販売"
-        elif "予約" in combined:
-            result["sale_type"] = "予約販売"
-        elif "受注" in combined:
-            result["sale_type"] = "受注販売"
-        elif "追加販売" in combined:
-            result["sale_type"] = "追加販売"
-        elif "再販" in combined or "再販売" in combined:
-            result["sale_type"] = "再販"
-        else:
-            result["sale_type"] = "販売情報"
-
-        # 税込価格の候補
-        price_patterns = [
-            r"([0-9,]+)\s*円\s*[（(]?税込",
-            r"販売価格[^0-9]{0,20}([0-9,]+)\s*円",
-            r"価格[^0-9]{0,20}([0-9,]+)\s*円",
-        ]
-
-        for pattern in price_patterns:
-            match = re.search(pattern, text)
-
-            if match:
-                try:
-                    result["price"] = int(
-                        match.group(1).replace(",", "")
-                    )
-                    break
-                except ValueError:
-                    pass
-
-        return result
-
-    except Exception as exc:
-        print(
-            f"Detail fetch failed: {item['url']} : {exc}"
-        )
-
-        return result
-
-
-def fingerprint(item):
-    """
-    detail_textそのものはfingerprintに含めない。
-    サイト共通部分の微変更による誤検知を防ぐ。
-    """
-
-    important = {
-        "source": item.get("source"),
-        "title": item.get("title"),
-        "url": item.get("url"),
-        "retailer": item.get("retailer"),
-        "sale_type": item.get("sale_type"),
-        "price": item.get("price"),
-        "application_start": item.get("application_start"),
-        "application_end": item.get("application_end"),
-    }
-
-    raw = json.dumps(
-        important,
-        ensure_ascii=False,
-        sort_keys=True,
-    )
-
-    return hashlib.sha256(
-        raw.encode("utf-8")
-    ).hexdigest()
-
-
-def load_state():
-    if not STATE_FILE.exists():
-        return {
-            "initialized": False,
-            "events": {},
-        }
-
-    try:
-        return json.loads(
-            STATE_FILE.read_text(encoding="utf-8")
-        )
-    except Exception:
-        return {
-            "initialized": False,
-            "events": {},
-        }
-
-
-def save_state(state):
-    STATE_FILE.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    STATE_FILE.write_text(
-        json.dumps(
-            state,
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-
-
-def make_post(item, change_type):
-    if change_type == "new":
-        header = "【ポケカ販売情報｜新着】"
-    else:
-        header = "【ポケカ販売情報｜更新】"
-
-    lines = [
-        header,
-        "",
-        f"📦 {item['title']}",
-    ]
-
-    retailer = item.get("retailer")
-    if retailer:
-        lines.append(f"🏪 {retailer}")
-
-    sale_type = item.get("sale_type")
-    if sale_type:
-        lines.append(f"🎫 {sale_type}")
-
-    price = item.get("price")
-    if price:
-        lines.append(f"💰 {price:,}円")
-
-    end = item.get("application_end")
-    if end:
-        lines.append(f"⏰ 締切：{end}")
-
-    lines.extend(
-        [
-            "",
-            "▼公式",
-            item["url"],
-            "",
-            "#ポケカ #ポケモンカード",
-        ]
-    )
-
-    text = "\n".join(lines)
-
-    # 長すぎる場合はタイトルを短縮
-    if len(text) > 270:
-        short_title = item["title"][:80] + "…"
-
-        lines[2] = f"📦 {short_title}"
-        text = "\n".join(lines)
-
-    return text
-
-
-def post_buffer(text):
-    api_key = os.environ["BUFFER_API_KEY"]
-    channel_id = os.environ["BUFFER_CHANNEL_ID"]
-
-    query = """
-    mutation PublishPost($input: CreatePostInput!) {
-      createPost(input: $input) {
-        __typename
-      }
-    }
-    """
-
-    variables = {
-        "input": {
-            "channelId": channel_id,
-            "text": text,
-            "mode": "shareNow",
-            "schedulingType": "automatic",
-            "aiAssisted": True,
-        }
-    }
-
-    payload = json.dumps(
-        {
-            "query": query,
-            "variables": variables,
-        }
-    ).encode("utf-8")
-
-    req = urllib.request.Request(
-        "https://api.buffer.com",
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
-
-    with urllib.request.urlopen(
-        req,
-        timeout=30,
-    ) as res:
-        result = json.loads(
-            res.read().decode("utf-8")
-        )
-
-    if result.get("errors"):
-        raise RuntimeError(
-            json.dumps(
-                result["errors"],
-                ensure_ascii=False,
-            )
-        )
-
-    typename = (
-        result.get("data", {})
-        .get("createPost", {})
-        .get("__typename")
-    )
-
-    if typename != "PostActionSuccess":
-        raise RuntimeError(
-            f"Unexpected Buffer result: {typename}"
-        )
-
-
-def main():
-    state = load_state()
-    old_events = state.get("events", {})
-
-    current = {}
-
-    for source in SOURCES:
-        print(f"Checking {source['name']}")
-
-        try:
-            page = fetch(source["url"])
-
-            candidates = extract_candidates(
-                source,
-                page,
-            )
-
-            print(
-                f"Sale candidates: {len(candidates)}"
-            )
-
-            for candidate in candidates:
-                item = extract_detail(candidate)
-                item["fingerprint"] = fingerprint(item)
-
-                current[item["id"]] = item
-
-        except Exception as exc:
-            print(
-                f"Source failed: "
-                f"{source['name']} : {exc}"
-            )
-
-    # 取得失敗時に空stateで上書きしない
-    if not current:
-        raise RuntimeError(
-            "No sale candidates found. "
-            "State was NOT overwritten."
-        )
-
-    now = datetime.now(
-        timezone.utc
-    ).isoformat()
-
-    # --------------------------------
-    # 初回 = baselineのみ
-    # --------------------------------
-
-    if not state.get("initialized"):
-        print(
-            "FIRST RUN / BASELINE MODE"
-        )
-
-        print(
-            "No posts will be sent to X."
-        )
-
-        for item in current.values():
-            item["first_seen"] = now
-            item["last_seen"] = now
-
-            # baselineは既知情報として扱う
-            item["posted_fingerprint"] = (
-                item["fingerprint"]
-            )
-
-        save_state(
-            {
-                "initialized": True,
-                "version": 2,
-                "updated_at": now,
-                "events": current,
-            }
-        )
-
-        print(
-            f"Baseline saved: {len(current)} events"
-        )
-
-        return
-
-    # --------------------------------
-    # 差分判定
-    # --------------------------------
-
-    notifications = []
-
-    for event_id, item in current.items():
-
-        old = old_events.get(event_id)
-
-        if old is None:
-
-            item["first_seen"] = now
-            item["last_seen"] = now
-
-            notifications.append(
-                ("new", item)
-            )
-
-        else:
-
-            item["first_seen"] = old.get(
-                "first_seen",
-                now,
-            )
-
-            item["last_seen"] = now
-
-            old_fp = old.get(
-                "fingerprint"
-            )
-
-            if old_fp != item["fingerprint"]:
-
-                notifications.append(
-                    ("updated", item)
-                )
-
-            item["posted_fingerprint"] = (
-                old.get("posted_fingerprint")
-            )
-
-    print(
-        f"Notifications: {len(notifications)}"
-    )
-
-    # 異常時の大量投稿防止
-    MAX_POSTS_PER_RUN = 3
-
-    for change_type, item in notifications[
-        :MAX_POSTS_PER_RUN
-    ]:
-
-        text = make_post(
-            item,
-            change_type,
-        )
-
-        print("----------------")
-        print(text)
-        print("----------------")
-
-        post_buffer(text)
-
-        item["posted_fingerprint"] = (
-            item["fingerprint"]
-        )
-
-        item["posted_at"] = now
-
-    # 過去情報も保持
-    merged = dict(old_events)
-    merged.update(current)
-
-    save_state(
-        {
-            "initialized": True,
-            "version": 2,
-            "updated_at": now,
-            "events": merged,
-        }
-    )
-
-    print("Monitor V2 completed.")
-
-
-if __name__ == "__main__":
-    main()
+  },
+  "initialized": true,
+  "updated_at": "2026-10-01T11:38:28.594505+00:00"
+}
