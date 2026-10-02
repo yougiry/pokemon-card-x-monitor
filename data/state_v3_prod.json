@@ -1,0 +1,60 @@
+{
+  "events": {
+    "45f03be85124a40ff541c9da": {
+      "application_end": null,
+      "application_start": null,
+      "category": "追加販売",
+      "conditions": null,
+      "detail_status": "fetched",
+      "fingerprint": "9bd78b5121f6083022818d601a31e9556ff3dcccc927f7788d4357deb8006965",
+      "id": "45f03be85124a40ff541c9da",
+      "official_url": "https://www.pokemon-card.com/info/005069.html",
+      "price": null,
+      "product_name": "ポケモンカードゲーム スカーレット＆バイオレット スペシャルBOXの追加生産、および追加販売のお知らせ",
+      "retailer": "ポケモンカード公式",
+      "sale_datetime": null,
+      "source_url": "https://www.pokemon-card.com/info/index.html",
+      "status": "unknown",
+      "verified": true
+    },
+    "83012a4498da15921e7e5f1b": {
+      "application_end": "2026-10-01T17:59:00+09:00",
+      "application_start": "2026-09-28T11:00:00+09:00",
+      "category": "抽選",
+      "conditions": null,
+      "detail_status": "fetched",
+      "fingerprint": "0432caf8de9c2b55a3c189bc6861de48f2784eccf4a7115eba59a60da90157b2",
+      "id": "83012a4498da15921e7e5f1b",
+      "official_url": "https://geo-online.co.jp/news/785",
+      "price": null,
+      "product_name": "「ポケモンカードゲーム 」「ONE PIECEカードゲーム』再販商品 抽選販売受付のお知らせ",
+      "retailer": "GEO",
+      "sale_datetime": null,
+      "source_url": "https://geo-online.co.jp/news/",
+      "status": "closed",
+      "verified": true
+    },
+    "ef9468e28773815d296b0bc6": {
+      "application_end": "2026-10-01T17:59:00+09:00",
+      "application_start": "2026-09-28T11:00:00+09:00",
+      "category": "抽選",
+      "conditions": null,
+      "detail_status": "fetched",
+      "fingerprint": "350a8b2453d718168024839f76ad1a146b49e974703d7ba58621ded175bf6918",
+      "id": "ef9468e28773815d296b0bc6",
+      "official_url": "https://geo-online.co.jp/news/783",
+      "price": null,
+      "product_name": "10月16日(金)発売『ポケモンカードゲーム MEGA「30th CELEBRATION カードセット」（9種セット）』抽選販売受付のお知らせ",
+      "retailer": "GEO",
+      "sale_datetime": null,
+      "source_url": "https://geo-online.co.jp/news/",
+      "status": "closed",
+      "verified": true
+    }
+  },
+  "initialized": true,
+  "pending": {},
+  "posted": {},
+  "updated_at": "2026-10-02T00:45:13.101277+00:00",
+  "version": 3
+}
