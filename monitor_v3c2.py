@@ -34,9 +34,9 @@ TEST_URLS = [
 
 
 DATE_PATTERN = (
-    r"(?:(\d{4})年)?"
-    r"(\d{1,2})月"
-    r"(\d{1,2})日"
+    r"(?:(\d{4})[年/])?"
+    r"(\d{1,2})[月/]"
+    r"(\d{1,2})日?"
     r"(?:\([^)]+\))?"
     r"(?:\s*"
     r"(\d{1,2})"
@@ -71,6 +71,7 @@ END_LABELS = [
 
 
 PERIOD_LABELS = [
+    "応募期間は",
     "応募期間",
     "応募受付期間",
     "受付期間",
@@ -233,6 +234,7 @@ def find_period(text, default_year):
         pattern = re.compile(
             re.escape(label)
             + r"[^0-9]{0,80}"
+            + r"[「『\"]?\s*"
             + DATE_PATTERN
             + r"\s*"
             + r"(?:～|〜|~|－|-|から)"
