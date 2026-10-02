@@ -1,7 +1,13 @@
 name: Pokemon Card Monitor V3C7
 
 on:
+
   workflow_dispatch:
+
+  schedule:
+
+    - cron: "17 * * * *"
+    
 
 permissions:
   contents: write
