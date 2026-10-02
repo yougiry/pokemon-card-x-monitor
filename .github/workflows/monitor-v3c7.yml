@@ -1,0 +1,67 @@
+name: Pokemon Card Monitor V3C7
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pokemon-card-v3c7
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile monitor_v3c7.py
+
+      - name: Run V3C7 monitor
+        env:
+          BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+          BUFFER_CHANNEL_ID: ${{ secrets.BUFFER_CHANNEL_ID }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python monitor_v3c7.py
+
+      - name: Save V3 production state
+        run: |
+          set -e
+
+          if [ ! -f data/state_v3_prod.json ]; then
+            echo "ERROR: state_v3_prod.json not created."
+            exit 1
+          fi
+
+          cp data/state_v3_prod.json /tmp/state_v3_prod.json
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          mkdir -p data
+          cp /tmp/state_v3_prod.json data/state_v3_prod.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -f data/state_v3_prod.json
+
+          if git diff --cached --quiet; then
+            echo "No V3 state changes."
+            exit 0
+          fi
+
+          git commit -m "Update V3 production state"
+          git push origin HEAD:main
