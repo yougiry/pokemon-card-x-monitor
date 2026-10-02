@@ -1597,8 +1597,8 @@ def main():
     )
 
     print(
-        "DRY RUN: "
-        "Buffer/X投稿なし"
+        "LIVE MODE: "
+        "actionable eventのみBuffer/X投稿"
     )
 
     print(
@@ -1709,7 +1709,7 @@ def main():
 
     print()
     print(
-        "WOULD POST COUNT: "
+        "POSTED COUNT: "
         f"{len(simulated)}"
     )
 
@@ -1756,7 +1756,8 @@ def main():
 
     print()
     print(
-        "V3-C6 PRODUCTION BASELINE "
+        "V3-C7 BUFFER PRODUCTION "
+
         "completed."
     )
 
