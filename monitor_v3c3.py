@@ -1146,7 +1146,6 @@ def build_preview(event):
 # ============================================================
 # Queue
 # ============================================================
-
 def queue_new_or_changed(
     state,
     current,
@@ -1168,10 +1167,8 @@ def queue_new_or_changed(
 
     added = []
 
-    for event_id, event in (
-        current.items()
-    ):
-                status = event.get(
+    for event_id, event in current.items():
+        status = event.get(
             "status",
             "unknown",
         )
@@ -1194,6 +1191,7 @@ def queue_new_or_changed(
             )
 
             continue
+
         old = old_events.get(
             event_id
         )
@@ -1251,8 +1249,7 @@ def queue_new_or_changed(
         if not changed:
             continue
 
-        # 同じfingerprintを既に
-        # 投稿済みなら再投稿しない。
+        # 同じfingerprintを既に投稿済みなら再投稿しない
         posted_record = posted.get(
             event_id
         )
@@ -1265,14 +1262,11 @@ def queue_new_or_changed(
             == new_fingerprint
         ):
             print(
-                "  SKIP: "
-                "already posted"
+                "  SKIP: already posted"
             )
-
             continue
 
-        # 同じfingerprintが既に
-        # pendingなら重複登録しない。
+        # 同じfingerprintがpendingなら重複登録しない
         pending_record = pending.get(
             event_id
         )
@@ -1285,10 +1279,8 @@ def queue_new_or_changed(
             == new_fingerprint
         ):
             print(
-                "  SKIP: "
-                "already pending"
+                "  SKIP: already pending"
             )
-
             continue
 
         pending[event_id] = {
@@ -1313,7 +1305,6 @@ def queue_new_or_changed(
         )
 
     return added
-
 
 # ============================================================
 # Queue DRY RUN
