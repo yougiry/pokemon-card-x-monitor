@@ -1386,7 +1386,6 @@ def simulate_pending_posts(
 # ============================================================
 # Main
 # ============================================================
-
 def main():
     print(
         "Pokemon Card Monitor "
@@ -1411,9 +1410,7 @@ def main():
     state = load_test_state()
 
     print()
-    print(
-        "STATE BEFORE:"
-    )
+    print("STATE BEFORE:")
 
     print(
         "  events="
@@ -1454,7 +1451,7 @@ def main():
     print()
     print("=" * 72)
 
-        print(
+    print(
         "TOTAL VERIFIED EVENTS: "
         f"{len(current)}"
     )
@@ -1473,6 +1470,7 @@ def main():
         print(
             "FIRST RUN / BASELINE MODE"
         )
+
         print(
             "No posts will be sent."
         )
@@ -1496,8 +1494,7 @@ def main():
         f"{len(state['pending'])}"
     )
 
-    # 初回baselineでは絶対に
-    # 投稿シミュレーションもしない。
+    # 初回baselineでは投稿処理を行わない。
     if first_run:
         simulated = []
 
@@ -1517,7 +1514,7 @@ def main():
         f"{len(state['pending'])}"
     )
 
-    # 現在取得できたイベントを保存。
+    # 今回取得したイベントを保存
     state["events"] = current
 
     state["initialized"] = True
@@ -1530,16 +1527,13 @@ def main():
         ).isoformat()
     )
 
-    # C6専用
-    # data/state_v3_prod.json にだけ保存する。
+    # C6専用stateへ保存
     save_test_state(
         state
     )
 
     print()
-    print(
-        "STATE AFTER:"
-    )
+    print("STATE AFTER:")
 
     print(
         "  events="
