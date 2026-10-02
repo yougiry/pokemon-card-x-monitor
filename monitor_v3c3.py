@@ -6,6 +6,8 @@ import re
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+JST = ZoneInfo("Asia/Tokyo")
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
@@ -19,7 +21,7 @@ from urllib.parse import urljoin, urlparse
 # ・data/state_v3_test.json のみ使用
 # ============================================================
 
-VERSION = "3C3-BASE-CHECK"
+VERSION = "3C3-STATUS-QUEUE-DRY-RUN"
 
 TEST_STATE_FILE = Path("data/state_v3_test.json")
 
@@ -539,6 +541,65 @@ def extract_price(text):
     return None
 
 
+DATE_PATTERN = (
+    r"(?:(\d{4})[年/])?"
+    r"(\d{1,2})[月/]"
+    r"(\d{1,2})日?"
+    r"(?:\([^)]+\))?"
+    r"(?:\s*"
+    r"(\d{1,2})"
+    r"(?::|時)"
+    r"(\d{1,2})?"
+    r"分?"
+    r")?"
+)
+
+PERIOD_LABELS = [
+    "応募期間は",
+    "応募期間",
+    "応募受付期間",
+    "受付期間",
+    "抽選受付期間",
+    "抽選期間",
+    "予約受付期間",
+]
+
+
+def parse_date_groups(groups, default_year):
+    year = (
+        int(groups[0])
+        if groups[0]
+        else default_year
+    )
+
+    month = int(groups[1])
+    day = int(groups[2])
+
+    hour = (
+        int(groups[3])
+        if groups[3]
+        else 0
+    )
+
+    minute = (
+        int(groups[4])
+        if groups[4]
+        else 0
+    )
+
+    try:
+        return datetime(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            tzinfo=JST,
+        )
+    except ValueError:
+        return None
+
+
 def extract_period(text):
     result = {
         "application_start": None,
@@ -548,48 +609,98 @@ def extract_period(text):
     if not text:
         return result
 
-    date_pattern = (
-        r"\d{4}年"
-        r"\d{1,2}月"
-        r"\d{1,2}日"
-        r"(?:\([^)]+\))?"
-        r"(?:\s*"
-        r"\d{1,2}"
-        r"[:時]"
-        r"\d{0,2}分?"
-        r")?"
-    )
+    now = datetime.now(JST)
 
-    patterns = [
-        (
-            rf"(?:応募期間|受付期間|"
-            rf"抽選期間|応募受付)"
-            rf"[^0-9]{{0,80}}"
-            rf"({date_pattern})"
-            rf"\s*[～〜~\-]\s*"
-            rf"({date_pattern})"
-        ),
-    ]
-
-    for pattern in patterns:
-        match = re.search(
-            pattern,
-            text,
+    for label in PERIOD_LABELS:
+        pattern = re.compile(
+            re.escape(label)
+            + r"[^0-9]{0,80}"
+            + r"[「『\"]?\s*"
+            + DATE_PATTERN
+            + r"\s*"
+            + r"(?:～|〜|~|－|-|から)"
+            + r"\s*"
+            + DATE_PATTERN,
+            flags=re.I,
         )
 
-        if match:
-            result[
-                "application_start"
-            ] = match.group(1)
+        match = pattern.search(text)
 
-            result[
-                "application_end"
-            ] = match.group(2)
+        if not match:
+            continue
 
-            break
+        groups = match.groups()
+
+        start = parse_date_groups(
+            groups[0:5],
+            now.year,
+        )
+
+        end = parse_date_groups(
+            groups[5:10],
+            now.year,
+        )
+
+        if start:
+            result["application_start"] = (
+                start.isoformat()
+            )
+
+        if end:
+            result["application_end"] = (
+                end.isoformat()
+            )
+
+        return result
 
     return result
 
+
+def parse_iso_datetime(value):
+    if not value:
+        return None
+
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def determine_status(event):
+    now = datetime.now(JST)
+
+    start = parse_iso_datetime(
+        event.get("application_start")
+    )
+
+    end = parse_iso_datetime(
+        event.get("application_end")
+    )
+
+    if start and end:
+        if now < start:
+            return "upcoming"
+
+        if start <= now <= end:
+            return "open"
+
+        return "closed"
+
+    if end:
+        return (
+            "open"
+            if now <= end
+            else "closed"
+        )
+
+    if start:
+        return (
+            "upcoming"
+            if now < start
+            else "unknown"
+        )
+
+    return "unknown"
 
 # ============================================================
 # Event
@@ -672,7 +783,11 @@ def make_event(
         "verified": True,
         "detail_status": detail_status,
     }
+    event["status"] = determine_status(
 
+        event
+
+    )
     # fingerprintには
     # 安定した意味情報だけを使用する。
     fingerprint_data = {
@@ -1056,6 +1171,29 @@ def queue_new_or_changed(
     for event_id, event in (
         current.items()
     ):
+                status = event.get(
+            "status",
+            "unknown",
+        )
+
+        if status not in (
+            "open",
+            "upcoming",
+        ):
+            print(
+                "QUEUE SKIP STATUS: "
+                f"{status} | "
+                f"{event['retailer']} | "
+                f"{event['product_name'][:60]}"
+            )
+
+            # C1時代に作られた古いpendingも除去
+            pending.pop(
+                event_id,
+                None,
+            )
+
+            continue
         old = old_events.get(
             event_id
         )
