@@ -36,6 +36,32 @@ jobs:
         run: |
           python monitor_v3c8.py
 
+                - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile collect_chatgpt.py
+          python -m py_compile monitor_v3c8.py
+
+      - name: Collect Pokemon Card information
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-6-luna
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python collect_chatgpt.py
+
+      - name: Run V3C8
+        env:
+          BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+          BUFFER_CHANNEL_ID: ${{ secrets.BUFFER_CHANNEL_ID }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python monitor_v3c8.py
+
       - name: Save queue and state
         run: |
           set -e
