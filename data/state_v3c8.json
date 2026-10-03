@@ -1,5 +1,15 @@
 {
-  "last_run_at": "2026-10-03T09:23:25+09:00",
-  "posted": {},
+  "last_run_at": "2026-10-03T09:24:58+09:00",
+  "posted": {
+    "c479d56ac05eeebf224bec343eff0fed41c572cf973bb4ecf105cb2487b31533": {
+      "buffer_post_id": "6ac04b59724c7034229b5948",
+      "category": "テスト",
+      "event_id": "c8-live-test-20261003-01",
+      "official_url": "https://www.pokemon-card.com/",
+      "posted_at": "2026-10-03T09:24:58+09:00",
+      "retailer": "C8動作確認",
+      "revision": "1"
+    }
+  },
   "version": 8
 }
