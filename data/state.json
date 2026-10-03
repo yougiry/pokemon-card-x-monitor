@@ -5,7 +5,7 @@
       "fingerprint": "8ed6a323c40c44cb862949c3fb142b1b53bd533f1809ec8c86bcd19e2d26ca77",
       "first_seen": "2026-10-01T23:12:07.972148+00:00",
       "id": "87ab030a91d858f57b6fce73",
-      "last_seen": "2026-10-02T20:44:17.150191+00:00",
+      "last_seen": "2026-10-03T00:29:56.581067+00:00",
       "posted_fingerprint": "8ed6a323c40c44cb862949c3fb142b1b53bd533f1809ec8c86bcd19e2d26ca77",
       "price": null,
       "retailer": "ポケモンカード公式",
@@ -19,7 +19,7 @@
       "fingerprint": "4cc0ebc41623cfa38fef25b9a45e1421997f17f5ed2a7111111b6273965d3d10",
       "first_seen": "2026-10-01T23:12:07.972148+00:00",
       "id": "ccd08383234921f1a8cbcfd2",
-      "last_seen": "2026-10-02T20:44:17.150191+00:00",
+      "last_seen": "2026-10-03T00:29:56.581067+00:00",
       "posted_fingerprint": "4cc0ebc41623cfa38fef25b9a45e1421997f17f5ed2a7111111b6273965d3d10",
       "price": null,
       "retailer": "ポケモンセンターオンライン",
@@ -33,7 +33,7 @@
       "fingerprint": "87b4366f670b60706a5d8e5a3a12ecbc1d86cd3b7206db498f10a2c833b0a702",
       "first_seen": "2026-10-01T23:12:07.972148+00:00",
       "id": "f490a76273389bf28aa04e3e",
-      "last_seen": "2026-10-02T20:44:17.150191+00:00",
+      "last_seen": "2026-10-03T00:29:56.581067+00:00",
       "posted_fingerprint": "87b4366f670b60706a5d8e5a3a12ecbc1d86cd3b7206db498f10a2c833b0a702",
       "price": null,
       "retailer": "ポケモンセンターオンライン",
@@ -44,6 +44,6 @@
     }
   },
   "initialized": true,
-  "updated_at": "2026-10-02T20:44:17.150191+00:00",
+  "updated_at": "2026-10-03T00:29:56.581067+00:00",
   "version": 2
 }
