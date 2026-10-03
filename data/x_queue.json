@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "event_id": "c8-live-test-20261003-01",
+    "revision": "1",
+    "retailer": "C8動作確認",
+    "category": "テスト",
+    "verified": true,
+    "official_url": "https://www.pokemon-card.com/",
+    "text": "【ポケカ監視システム C8動作テスト】\n\nChatGPT監視 → C8 → Buffer → X の投稿経路確認です。\n実際の販売・抽選情報ではありません。\n\n#ポケカ"
+  }
+]
