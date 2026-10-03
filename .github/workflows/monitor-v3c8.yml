@@ -1,0 +1,67 @@
+name: Pokemon Card Monitor V3C8
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pokemon-card-v3c8
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Check Python syntax
+        run: |
+          python -m py_compile monitor_v3c8.py
+
+      - name: Run V3C8
+        env:
+          BUFFER_API_KEY: ${{ secrets.BUFFER_API_KEY }}
+          BUFFER_CHANNEL_ID: ${{ secrets.BUFFER_CHANNEL_ID }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python monitor_v3c8.py
+
+      - name: Save queue and state
+        run: |
+          set -e
+
+          cp data/x_queue.json /tmp/x_queue.json
+          cp data/state_v3c8.json /tmp/state_v3c8.json
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          mkdir -p data
+
+          cp /tmp/x_queue.json data/x_queue.json
+          cp /tmp/state_v3c8.json data/state_v3c8.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -f \
+            data/x_queue.json \
+            data/state_v3c8.json
+
+          if git diff --cached --quiet; then
+            echo "No C8 state changes."
+            exit 0
+          fi
+
+          git commit -m "Update V3C8 queue state"
+          git push origin HEAD:main
