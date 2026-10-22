@@ -1,8 +1,26 @@
 {
-  "events": {},
+  "events": {
+    "45f03be85124a40ff541c9da": {
+      "application_end": null,
+      "application_start": null,
+      "category": "追加販売",
+      "conditions": null,
+      "detail_status": "fetched",
+      "fingerprint": "9bd78b5121f6083022818d601a31e9556ff3dcccc927f7788d4357deb8006965",
+      "id": "45f03be85124a40ff541c9da",
+      "official_url": "https://www.pokemon-card.com/info/005069.html",
+      "price": null,
+      "product_name": "ポケモンカードゲーム スカーレット＆バイオレット スペシャルBOXの追加生産、および追加販売のお知らせ",
+      "retailer": "ポケモンカード公式",
+      "sale_datetime": null,
+      "source_url": "https://www.pokemon-card.com/info/index.html",
+      "status": "unknown",
+      "verified": true
+    }
+  },
   "initialized": true,
   "pending": {},
   "posted": {},
-  "updated_at": "2026-10-22T07:31:34.023842+00:00",
+  "updated_at": "2026-10-22T13:45:24.919893+00:00",
   "version": 3
 }
