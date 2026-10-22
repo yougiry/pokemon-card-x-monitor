@@ -5,7 +5,7 @@
       "application_start": null,
       "category": "追加販売",
       "conditions": null,
-      "detail_status": "fetched",
+      "detail_status": "http_503",
       "fingerprint": "9bd78b5121f6083022818d601a31e9556ff3dcccc927f7788d4357deb8006965",
       "id": "45f03be85124a40ff541c9da",
       "official_url": "https://www.pokemon-card.com/info/005069.html",
@@ -21,6 +21,6 @@
   "initialized": true,
   "pending": {},
   "posted": {},
-  "updated_at": "2026-10-21T22:18:43.494347+00:00",
+  "updated_at": "2026-10-22T01:28:54.746918+00:00",
   "version": 3
 }
