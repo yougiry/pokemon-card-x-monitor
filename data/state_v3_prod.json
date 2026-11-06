@@ -16,11 +16,51 @@
       "source_url": "https://www.pokemon-card.com/info/index.html",
       "status": "unknown",
       "verified": true
+    },
+    "e5028ed075006e169cb0629a": {
+      "application_end": "2026-11-08T23:59:00+09:00",
+      "application_start": "2026-11-06T10:00:00+09:00",
+      "category": "抽選",
+      "conditions": null,
+      "detail_status": "fetched",
+      "fingerprint": "e34a3eb11b25597e4041d60db2870e366d8aaa2a40265504a9a87ff39baa127f",
+      "id": "e5028ed075006e169cb0629a",
+      "official_url": "https://shibuyatsutaya.tsite.jp/article/2853.html",
+      "price": null,
+      "product_name": "(金) - 2026.12.06(日) ポケモンカードゲーム MEGA 拡張パック「ハドウシーカー」抽選販売 # ポケカ # ポケモンカードゲーム # ポケカラウンジ",
+      "retailer": "SHIBUYA TSUTAYA",
+      "sale_datetime": null,
+      "source_url": "https://shibuyatsutaya.tsite.jp/",
+      "status": "open",
+      "verified": true
     }
   },
   "initialized": true,
-  "pending": {},
+  "pending": {
+    "e5028ed075006e169cb0629a": {
+      "event": {
+        "application_end": "2026-11-08T23:59:00+09:00",
+        "application_start": "2026-11-06T10:00:00+09:00",
+        "category": "抽選",
+        "conditions": null,
+        "detail_status": "fetched",
+        "fingerprint": "e34a3eb11b25597e4041d60db2870e366d8aaa2a40265504a9a87ff39baa127f",
+        "id": "e5028ed075006e169cb0629a",
+        "official_url": "https://shibuyatsutaya.tsite.jp/article/2853.html",
+        "price": null,
+        "product_name": "(金) - 2026.12.06(日) ポケモンカードゲーム MEGA 拡張パック「ハドウシーカー」抽選販売 # ポケカ # ポケモンカードゲーム # ポケカラウンジ",
+        "retailer": "SHIBUYA TSUTAYA",
+        "sale_datetime": null,
+        "source_url": "https://shibuyatsutaya.tsite.jp/",
+        "status": "open",
+        "verified": true
+      },
+      "fingerprint": "e34a3eb11b25597e4041d60db2870e366d8aaa2a40265504a9a87ff39baa127f",
+      "queued_at": "2026-11-06T06:37:20.243277+00:00",
+      "reason": "new"
+    }
+  },
   "posted": {},
-  "updated_at": "2026-11-06T00:12:03.626327+00:00",
+  "updated_at": "2026-11-06T06:37:20.379982+00:00",
   "version": 3
 }
